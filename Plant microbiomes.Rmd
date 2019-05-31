@@ -138,9 +138,9 @@ dev.off()
 # Purpose: Generate abundance occupancy graphs with bacteria and fungal data and site locations which are scaled the mean-annual precipitation 
 
 # Load in packages
-require(phyloseq)
-require(bipartite)
-require(raster)
+require('phyloseq')
+require('bipartite')
+require("raster")
 library("ggplot2")
 library("plotrix")
 library("viridis")
@@ -220,15 +220,15 @@ is.na(meanabund) <- meanabund==0
 meanabund=colMeans(meanabund, na.rm=TRUE)
 
 #Calculate per site habitat diversity (where present)
-habpersite=cbind(colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="1"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="2"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="3"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="4"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="5"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="6"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="7"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="8"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="10"), method = "pa"))))
+habpersite=cbind(colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s1"), method = "pa"))),
+      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s2"), method = "pa"))),
+      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s3"), method = "pa"))),
+      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s4"), method = "pa"))),
+      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s5"), method = "pa"))),
+      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s6"), method = "pa"))),
+      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s7"), method = "pa"))),
+      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s8"), method = "pa"))),
+      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s10"), method = "pa"))))
 is.na(habpersite) <- habpersite==0
 habpersite=rowMeans(habpersite, na.rm=TRUE)
 ```
@@ -244,7 +244,7 @@ habpersite=rowMeans(habpersite, na.rm=TRUE)
 ################################
 ## Fungal Abundance Occupancy ##
 ################################
-physeqF=readRDS("data/fungal_physeq1.gz")
+physeqF=readRDS("data/fungal_rarPhySeq.gz")
 rarPhySeqF=rarefy_even_depth(physeqF, sample.size = 2000)
 
 sample_data(rarPhySeqF)$Shore_dist=pointDistance(cbind(sample_data(rarPhySeqF)$Long,sample_data(rarPhySeqF)$Lat), c(-158.063625, 21.640741),lonlat=TRUE)
@@ -309,21 +309,20 @@ is.na(meanabundF) <- meanabundF==0
 meanabundF=rowMeans(meanabundF, na.rm=TRUE)
 
 #Calculate per site habitat diversity (where present)
-habpersiteF=cbind(rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="1"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="2"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="3"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="4"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="5"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="6"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="7"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="8"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="10"), method = "pa"))))
+habpersiteF=cbind(rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s1"), method = "pa"))),
+                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s2"), method = "pa"))),
+                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s3"), method = "pa"))),
+                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s4"), method = "pa"))),
+                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s5"), method = "pa"))),
+                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s6"), method = "pa"))),
+                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s7"), method = "pa"))),
+                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s8"), method = "pa"))),
+                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s10"), method = "pa"))))
 is.na(habpersiteF) <- habpersiteF==0
 habpersiteF=rowMeans(habpersiteF, na.rm=TRUE)
 ```
 
 ##### Bac-Fung: Habitat VS ESV range
-*(problems here)*
 ```{r, plots for Habitat VS ESV range}
 #Section 2. Making all plots 
 ######################################################
@@ -359,6 +358,8 @@ text(4000,8, expression(paste(italic("cor = 0.625 \np <0.001"))), cex=0.8)
 cor.test(rangespan, meanabund) #Calculate correlation
 
 plot(jitter(rangespan,20),jitter(log(meanabund),3),col="#481567FF", cex=.2, xlab="ESV range (m)", ylab="Mean Abundance Per Sample (Where Present)", main="Bacteria: Mean Abundance vs. ESV Range")
+abline(lsfit(rangespan,log(meanabund)), col="black", lwd=3)
+ablineclip(lm(rangespan~meanabund), lty = 2) #Add cut-off lines
 text(temp,expression(paste(italic("cor = -0.003 \np = 0.678"))), cex=0.8)
 
 ###### Plot Fungi: Mean abundance vs.  ESV Range (PLOT 4) ###### 
