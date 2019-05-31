@@ -77,7 +77,61 @@ Waimea_map_6_sizescaled # Print the plot
 ggsave("figures/Map6_SizeScaled.tiff", Waimea_map_6_sizescaled, height = 6, width = 6, units = "in", device = "tiff", dpi=300)
 ```
 
+#### Mantel: fung, bact
+```{r, fungibacteria_mantel}
+# Code by Anthony
+# modifed by Chris Wall
+# To plot mantel correlation between fungi and Bacteria
+require(vegan)
+require(ggplot2)
+
+#read normalized Bacteria Phylloseq object
+PS_normal=readRDS("data/PS_normal.gz")
+
+#read normalized Fungi Phylloseq object
+fungal_PS_normal=readRDS("data/fungal_PS_normal.gz")
+
+#sqrttransform
+sqrtfun=transform_sample_counts(fungal_PS_normal, function(x) x^0.5)
+
+#remove the sample missing from Bacteria
+sqrtfun=subset_samples(fungal_PS_normal, CollectionID !="WMEA_01223_Pl_1")
+
+#calculate bray-curtis distance 
+funhel.dist=phyloseq::distance(sqrtfun, "bray") 
+
+#remove this sample wich was low abundance in fungi
+PS_normal=subset_samples(PS_normal, CollectionID !="WMEA_01223_Pl_1")
+
+#sqrttransform
+sqrt=transform_sample_counts(PS_normal, function(x) x^0.5)
+
+#calculate bray curtis distance
+hel.dist=phyloseq::distance(sqrt, "bray") 
+
+#Calculate mantel
+m=mantel(hel.dist,funhel.dist)
+#make a dataframe for ggplot
+mantel=as.data.frame(cbind(c(hel.dist), c(funhel.dist)))
+
+# make plot
+ggplot(mantel,aes(mantel$V1,mantel$V2))+
+  geom_point()+
+  geom_smooth()+
+  theme_bw()+
+  ggtitle("Fungi and Bacteria Community Similarity")+
+  xlab("Fungal Dissimilarity")+
+  ylab("Bacteria Dissimilarity")+
+  annotate("text", x=.5, y=.3,label="r=0.434, P=0.001")+
+  theme(plot.title = element_text(hjust = 1))
+
+dev.print(png, "figures/community.mantel.png", units="in", width=4, height=4, res=300)
+dev.off()
+
+```
+
 #### Bacterial Abundance Occupancy
+*(problems here)*
 ```{r, Bacterial Abundance Occupancy}
 # Code by Anthony
 # modified by Feresa Corazon, Chris Wall
@@ -269,6 +323,7 @@ habpersiteF=rowMeans(habpersiteF, na.rm=TRUE)
 ```
 
 ##### Bac-Fung: Habitat VS ESV range
+*(problems here)*
 ```{r, plots for Habitat VS ESV range}
 #Section 2. Making all plots 
 ######################################################
