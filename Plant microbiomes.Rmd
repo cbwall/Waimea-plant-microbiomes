@@ -67,15 +67,19 @@ Waimea_map_6_sizescaled <- Waimea_map_3 + # Existing map
   coord_fixed(1.3) + # Aspect ratio of cartesian coordinates is 1.3
   labs(x="Longitude", y="Latitude", size="Precipitation (mm/year)", fill="Elevation (m)") + # Labels
   theme_classic() # Classic minimalist theme
-```
-```{r, map, fig.align='center', warning=FALSE}
+
 Waimea_map_6_sizescaled # Print the plot
 
 # Save the plot as a tiff image with 300 dpi. 
 # Setting to 6x6 inches of the plot with the expectation that this is 2x larger than publication size 
 # per publication guidelines (expected print size 3x3 in)
-ggsave("figures/Map6_SizeScaled.tiff", Waimea_map_6_sizescaled, height = 6, width = 6, units = "in", device = "tiff", dpi=300)
+# ggsave("figures/Map6_SizeScaled.tiff", Waimea_map_6_sizescaled, height = 6, width = 6, units = "in", device = "tiff", dpi=300)
 ```
+<center>  
+  
+![**Figure 1. Site map with sampling locations**](figures/bot662_map_final.tif){ width=60%}
+
+</center>  
 
 
 #### Mantel: fung, bact
@@ -522,11 +526,9 @@ dev.off()
 
 #### Mantel Tests and Slope Plot
 ```{r}
-#######################################################################################
-######################## Mantel Tests and Slope Plots By Plant Part ###################
-################################ Chad Wilhite 04/25/19 ################################
-#######################################################################################
-
+## Mantel Tests and Slope Plots By Plant Part
+## Chad Wilhite 04/25/19
+## edited Chris Wall
 
 # Load required packages
 require(fossil)
@@ -543,7 +545,6 @@ require(ggplot2)
 ##
 ###
 #### Bacteria Analysis
-
 
 # Load RDS file of normalized bacterial reads
 PS_normal = readRDS("data/PS_normal.gz") #"PS_normal"
@@ -585,12 +586,9 @@ litt_otu.dist = phyloseq::distance(litt_otu, "bray")
 axil_otu.dist = phyloseq::distance(axil_otu, "bray") 
 peti_otu.dist = phyloseq::distance(peti_otu, "bray")
 
-
-
 #
 ##
 ### Create correctly ordered sized geographic distance dissimilarity matrix
-
 
 #Gather bacterial spatial data from the phyloseq object
 all.geo  = cbind(sample_data(PS_normal.hell)$Lon, sample_data(PS_normal.hell)$Lat)
@@ -602,8 +600,6 @@ soil.geo = cbind(sample_data(soil_otu)$Lon, sample_data(soil_otu)$Lat)
 litt.geo = cbind(sample_data(litt_otu)$Lon, sample_data(litt_otu)$Lat)
 axil.geo = cbind(sample_data(axil_otu)$Lon, sample_data(axil_otu)$Lat) 
 peti.geo = cbind(sample_data(peti_otu)$Lon, sample_data(peti_otu)$Lat)
-
-
 
 # Generate a dissimilarity matrix for grouped (all plant parts) and by plant part 
 # 	bacterial geographic distance data 
@@ -617,8 +613,6 @@ litt.geodist = earth.dist(litt.geo)
 axil.geodist = earth.dist(axil.geo)
 peti.geodist = earth.dist(peti.geo)
 
-
-
 #Mantel test by SampleType
 all_bacteria_mantel  = mantel(log( all.geodist+1),log( all_otu.dist), permutations= 999)
 stem_bacteria_mantel = mantel(log(stem.geodist+1),log(stem_otu.dist), permutations= 999)
@@ -629,8 +623,6 @@ soil_bacteria_mantel = mantel(log(soil.geodist+1),log(soil_otu.dist), permutatio
 litt_bacteria_mantel = mantel(log(litt.geodist+1),log(litt_otu.dist), permutations= 999)
 axil_bacteria_mantel = mantel(log(axil.geodist+1),log(axil_otu.dist), permutations= 999)
 peti_bacteria_mantel = mantel(log(peti.geodist+1),log(peti_otu.dist), permutations= 999)
-
-
 
 
 #Call the bacterial results
@@ -644,8 +636,6 @@ litt_bacteria_mantel
 axil_bacteria_mantel
 peti_bacteria_mantel
 
-
-
 #############################################
 ################ Fungal #####################
 #############################################
@@ -655,8 +645,6 @@ FPS_normal = readRDS("data/fungal_PS_normal.gz") #"fungal_PS_normal"
 
 #square root transform (Hellinger)
 FPS_normal.hell = transform_sample_counts(FPS_normal, function(x) x^0.5)
-
-
 
 #Subset Fungal Data by SampleType
 fstem_otu = subset_samples(FPS_normal.hell, SampleType=="Stem")
@@ -679,8 +667,6 @@ fsoil_otu.dist = phyloseq::distance(fsoil_otu, "bray")
 flitt_otu.dist = phyloseq::distance(flitt_otu, "bray")
 faxil_otu.dist = phyloseq::distance(faxil_otu, "bray")
 fpeti_otu.dist = phyloseq::distance(fpeti_otu, "bray")
-
-
 
 
 #Gather fungal spatial data from the phyloseq object
@@ -707,9 +693,6 @@ faxil.geodist = earth.dist(faxil.geo)
 fpeti.geodist = earth.dist(fpeti.geo)
 
 
-
-
-
 #Mantel test by SampleType
 fall_mantel  = mantel(log( fall.geodist+1),log( fall_otu.dist), permutations= 999)
 fstem_mantel = mantel(log(fstem.geodist+1),log(fstem_otu.dist), permutations= 999)
@@ -721,9 +704,6 @@ flitt_mantel = mantel(log(flitt.geodist+1),log(flitt_otu.dist), permutations= 99
 faxil_mantel = mantel(log(faxil.geodist+1),log(faxil_otu.dist), permutations= 999)
 fpeti_mantel = mantel(log(fpeti.geodist+1),log(fpeti_otu.dist), permutations= 999)
 
-
-
-
 #call the fungal results
 fall_mantel
 fstem_mantel
@@ -734,11 +714,6 @@ fsoil_mantel
 flitt_mantel
 faxil_mantel
 fpeti_mantel
-
-
-
-
-
 
 
 ###################################################
@@ -915,5 +890,283 @@ ggsave(filename = "figures/Fungal_Slopes_by_Plant_Part.eps", width = 10, height 
 dev.off()
 ```
 
+### Permanova
+```{r, PERMANOVA}
 
-```{r, }
+#Load Libraries
+library("ggplot2")
+library("plyr")
+library("vegan")
+
+##PERMANOVA Bacteria
+PS_normal = readRDS("data/PS_normal.gz")
+PS_normal=transform_sample_counts(PS_normal, function(x) x^0.5)
+PS_normal = subset_taxa(PS_normal, Order!="Chloroplast")
+PS_normal = subset_taxa(PS_normal, Kingdom!="Archaea")
+PS_normal = subset_taxa(PS_normal, Family!="Mitochondria")
+PS_normal = subset_taxa(PS_normal, Kingdom!="Unknown")
+#Use base boxplot functin to look at sequencing depth
+boxplot(sample_sums(PS_normal)~sample_data(PS_normal)$FieldSite)
+boxplot(sample_sums(PS_normal)~sample_data(PS_normal)$SampleType)
+
+
+#Bacterial ALL
+Gradient <- PS_normal@sam_data$rain
+Sample_Type <- PS_normal@sam_data$SampleType
+bact_ps = PS_normal #Normalized bact data - phyloseq-class
+bact_meta_all = as(sample_data(bact_ps), "data.frame") # Extract sample data and coerce to df
+bact_all = adonis(phyloseq::distance(bact_ps, method="bray") ~ Gradient*Sample_Type, by = "margin", data = bact_meta_all, permutations = 10000)
+bact_all
+
+
+##PERMANOVA Fungi
+FPS_normal = readRDS("data/fungal_PS_normal.gz")
+gradient <- FPS_normal@sam_data$rain
+SampleType <- FPS_normal@sam_data$SampleType
+fun_ps = transform_sample_counts(FPS_normal, function(x) x^0.5)
+fun_meta_all = as(sample_data(fun_ps), "data.frame") # Extract sample data and coerce to df
+fun_all = adonis(phyloseq::distance(fun_ps, method="bray") ~ gradient*SampleType, by = "margin", data = bact_meta_all, permutations = 10000)
+
+fun_all
+```
+
+#### NMDS
+issues here...
+```{r, NMDS heatmap}
+#Code by Maria and Helen
+#For NMDS plots and heat maps by Sample Type
+
+require(ggplot2)
+require(fossil)
+require(phyloseq)
+require(vegan)
+require(RColorBrewer)
+require(plyr)
+require(devtools)
+require(ggpubr)
+require(gridExtra)
+
+devtools::install_bitbucket("graumannlabtools/multipanelfigure")
+#read in normalized bacterial data
+PS_normal<-readRDS("data/PS_normal.gz")
+#read in bacteria phyloseq data
+physeq1 <- readRDS("data/physeq1.gz")  
+#read in rarified phyloseq data
+rarPhySeq <- readRDS("data/rarPhySeq.gz") 
+#Remove site 9
+PS_normal=subset_samples(PS_normal, FieldSite!="s9")
+#read in normalized fungal taxa
+fungal_norm<-readRDS("data/fungal_PS_normal.gz")
+#read in fungal phyloseq data
+funphys <- readRDS("data/fungal_physeq1.gz") 
+#read in rarified phyloseq data
+rarfun <- readRDS("data/fungal_rarPhySeq.gz")
+
+####################################
+##########NMDS PLOTS##############
+#hellinger transform bacteria
+phyobj.hell=transform_sample_counts(PS_normal, function(x) x^0.5)
+#hellinger transform fungus
+fungal.hell<-transform_sample_counts(fungal_norm,  function(x) x^0.5)
+##Organize sample type by levels of ground to air in all datasets
+sample_data(PS_normal)$SampleType = factor(sample_data(PS_normal)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(physeq1)$SampleType = factor(sample_data(physeq1)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(rarPhySeq)$SampleType = factor(sample_data(rarPhySeq)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+##Organize sample type by levels of ground to air in all datasets for fungus
+sample_data(fungal_norm)$SampleType = factor(sample_data(fungal_norm)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(funphys)$SampleType = factor(sample_data(funphys)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(rarfun)$SampleType = factor(sample_data(rarfun)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+
+#bacteria ordination
+phyobj.ord<-ordinate(phyobj.hell, "NMDS", "bray")
+#fungus ordination
+funhell.ord<-ordinate(fungal.hell, "NMDS", "bray")
+#define colorblind friendly color palette 
+cbPalette1<- c("#F0E442","#D55E00","#E69F00","#009E73","#999999","#CC79A7","#000000","#56B4E9","#0072B2")
+
+#bacteria NMDS by sample type
+plot1<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", color="SampleType")+ theme(legend.position="none")  #coord_equal(ratio=2) + theme_bw()
+plot1+
+  scale_fill_manual(values=cbPalette1) +  
+  scale_colour_manual(values=cbPalette1)+
+  stat_ellipse(geom="polygon",type="t", alpha=0.2, aes(fill=SampleType)) +
+  theme(legend.position="none") + coord_equal(ratio=2) +
+  annotate_figure(plot1,
+                  top = text_grob("Bacteria", color = "black", face = "bold", size = 14))+
+  theme_bw()
+#fungal NMDS by sample type
+plot2<-plot_ordination(fungal.hell, funhell.ord,type="samples", color="SampleType")
+plot2 +
+  scale_fill_manual(values=cbPalette1) +  
+  scale_colour_manual(values=cbPalette1)+
+  stat_ellipse(geom="polygon", type="t", alpha=0.2, aes(fill=SampleType)) +
+  theme(legend.position="none")  coord_equal(ratio=2)+
+  annotate_figure(plot2ell,op = text_grob("Fungi", color = "black", face = "bold", size = 14))
+  theme_bw()
+
+
+###################################
+########HEATMAP PLOTS#############
+
+####BACTERIA 16S###############
+##Substitute all of the FieldSite 10 into 9 in all datasets 
+a <- gsub("s10", "s9", (sample_data(PS_normal)$FieldSite))
+b <- gsub("s10", "s9", (sample_data(physeq1)$FieldSite))
+c <- gsub("s10", "s9", (sample_data(rarPhySeq)$FieldSite))
+##Replace old fieldsite names with new fieldsite names in all datasets
+a = sample_data(PS_normal)$FieldSite 
+b = sample_data(physeq1)$FieldSite 
+c = sample_data(rarPhySeq)$FieldSite 
+##Organize sample type by levels of ground to air in all datasets
+sample_data(PS_normal)$SampleType = factor(sample_data(PS_normal)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(physeq1)$SampleType = factor(sample_data(physeq1)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(rarPhySeq)$SampleType = factor(sample_data(rarPhySeq)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+
+###############################################################################################
+###Hellinger Transform Data###
+###############################################################################################
+
+##Hellinger transform data with Square root for any phyloseq dataset
+phyobject.hellrar <- transform_sample_counts(rarPhySeq,  function(x) x^0.5)  ## I used rarPhyseq because it looked the best for ITS data
+###############################################################################################
+###Subset Data###
+###############################################################################################
+
+## NOTE: Can put any physeq dataset (i.e. PS_normal, physeq1, rarPhySeq, phyobject.hell) into tax_glom(physeqobject, taxrank = "Rank you want to subset to") to subset
+## tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
+
+##Pool all ESVs by Phylum 
+phy_dat <- tax_glom(phyobject.hell, taxrank="Phylum")   ## subsetting for Hellinger transformed normalized data
+phy_dat1 <- tax_glom(phyobject.hellrar, taxrank="Phylum")   ## subsetting for Hellinger transformed rarified data
+phy_dat2 <- tax_glom(rarPhySeq, taxrank="Phylum") ## subsetting for rarPhySeq data
+phy_dat3 <- tax_glom(PS_normal, taxrank="Phylum") ## subsetting for normalized data
+
+##Pool all ESVs by Order 
+ord_dat <- tax_glom(phyobject.hell, taxrank="Order")  
+ord_dat1 <- tax_glom(phyobject.hell1, taxrank="Order")   
+ord_dat2 <- tax_glom(rarPhySeq, taxrank="Order")
+ord_dat3 <- tax_glom(PS_normal, taxrank="Order")
+
+
+## NOTE: Can put any Subsetted physeq dataset (i.e. phy_dat, ord_dat, etc.) or non-subsetted physeq dataset (i.e. physeq1, PS_normal, etc.) into plot_heatmap(physeqobject, ...)
+## NOTE: If using a subsetted physeq dataset, make sure set the taxa.label = taxrank for whichever taxonomic rank you make heatmap for
+
+##Ploting heatmap for Order in rarPhySeq subsetted data###
+
+##Plot the heatmap clustering by NMDS and Bray curtis distance, labeling sample type and supressing Taxon labels
+p1 <- plot_heatmap(phy_dat3, "NMDS", "bray", sample.label = "SampleType", sample.order= "FieldSite", taxa.label="Phylum", low = "yellow", high = "red", na.value= "white")
+##Plot Heatmap organized by Fieldsites (1-9) and grouped by SampleType
+q1 <- p1+ facet_grid(~SampleType, scales= "free_x", switch = "x")
+##Plot Heatmap with tick marks and FieldSite labels removed
+q2 <- q1 + theme(
+  axis.text.x = element_blank(),
+  axis.ticks = element_blank()
+) 
+plot(q2)
+
+
+#########FUNGAL ITS##################
+
+##Substitute all of the FieldSite 10 into 9 in all datasets 
+d <- gsub("s10", "s9", (sample_data(fungal_norm)$FieldSite))
+e <- gsub("s10", "s9", (sample_data(funphys)$FieldSite))
+f <- gsub("s10", "s9", (sample_data(rarfun)$FieldSite))
+
+##Replace old fieldsite names with new fieldsite names in all datasets
+d = sample_data(fungal_norm)$FieldSite 
+e = sample_data(funphys)$FieldSite 
+f = sample_data(rarfun)$FieldSite 
+
+##Organize sample type by levels of ground to air in all datasets
+sample_data(fungal_norm)$SampleType = factor(sample_data(fungal_norm)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(funphys)$SampleType = factor(sample_data(funphys)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(rarfun)$SampleType = factor(sample_data(rarfun)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+
+###############################################################################################
+###Hellinger Transform Data###
+###############################################################################################
+
+##Hellinger transform data with Square root for any phyloseq dataset
+rarfun.hell <- transform_sample_counts(rarfun,  function(x) x^0.5)  ## I used rarfun because it looked the best for ITS data
+
+###############################################################################################
+###Subset Data###
+###############################################################################################
+
+## NOTE: Can put any physeq dataset (i.e. fungal_norm, funphys, rarfun, phyobject.hell) into tax_glom(physeqobject, taxrank = "Rank you want to subset to") to subset
+## tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
+
+##Pool all ESVs by Phylum 
+funphy_dat <- tax_glom(rarfun.hell, taxrank="Phylum")   ## can replace "phyobject.hell" with any physeq object
+funphy_dat1 <- tax_glom(rarfun, taxrank="Phylum")
+funphy_dat2<- tax_glom(fungal.hell, taxrank= "Phylum")
+
+##Pool all ESVs by Order 
+funord_dat <- tax_glom(rarfun.hell, taxrank="Order")
+funord_dat1 <- tax_glom(rarfun, taxrank="Order")
+funord_dat2 <- tax_glom(fungal.hell, taxrank="Order")
+
+##Pool all ESVs by Class 
+funclass_dat <- tax_glom(rarfun.hell, taxrank="Class")
+funclass_dat1 <- tax_glom(rarfun, taxrank="Class")
+##Pool all ESVs by Family
+funfam_dat <- tax_glom(rarfun.hell, taxrank="Family")
+
+
+##Pool all ESVs by Genus 
+fungen_dat <- tax_glom(rarfun.hell, taxrank="Genus")
+
+###############################################################################################
+###Plot Heatmap###
+###############################################################################################
+
+## NOTE: Can put any Subsetted physeq dataset (i.e. phy_dat, ord_dat, etc.) or non-subsetted physeq dataset (i.e. funphys, fungal_norm, etc.) into plot_heatmap(physeqobject, ...)
+## NOTE: If using a subsetted physeq dataset, make sure set the taxa.label = taxrank for whichever taxonomic rank you make heatmap for
+
+##Ploting heatmap for Order in rarfun subsetted data###
+
+##Plot the heatmap clustering by NMDS and Bray curtis distance, labeling sample type and supressing Taxon labels
+fp1 <- plot_heatmap(funord_dat1, "NMDS", "bray", sample.label = "SampleType", sample.order= "FieldSite", taxa.label="Order", low = "yellow", high = "red", na.value= "white")
+##Plot Heatmap organized by Fieldsites (1-9) and grouped by SampleType
+fq1 <- fp1+ facet_grid(~SampleType,scales= "free_x", switch = "x")
+##Plot Heatmap with tick marks and FieldSite labels removed
+fq2 <- fq1 + theme(
+  axis.text.x = element_blank(),
+  axis.ticks = element_blank()
+) 
+plot(fq2)
+
+###################################################################################################################
+##################### BELOW HERE I AM LOST ON HOW TO MAKE PRETTY FIGURE############################################
+
+####MAKING A COMPOSITE FIGURE#########
+nmds<- ggarrange(qplot1,qplot2 + rremove("x.text"), common.legend = TRUE, legend="bottom", ncol=1, nrow=2)
+heatmaps<-ggarrange(q2+rremove("xlab"),fq2 + rremove("xlab"), common.legend = FALSE, legend="right", ncol=1, nrow=2)
+fullfig<-ggarrange(nmds, heatmaps + rremove("x.text"))
+ggdraw() +
+  draw_plot(nmds, x = 0, y = .5, width = .4, height = .4) +
+  draw_plot(heatmaps, x = 0, y = 0, width = .6, height = 0.6) +
+  draw_plot_label(label = c("A", "B", "C"), size = 15,
+                  x = c(0, 0.5, 0), y = c(1, 1, 0.5))
+plot(fullfig)         
+
+
+
+######THIS IS ANTHONY'S CODE FOR EPS FILE##################################
+
+#create EPS file
+setEPS()
+#using a postscript device
+postscript("nestedplots.eps")
+#make a two row composite figure, reguce spacing between inner and outer margins
+par(mfrow=c(2,1), mai=c(.1,1.,1,1), oma=c(.1,1,.1,1))
+#plot the fungal nested figure, suppress taxon names
+plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "green"), lwd=3, main="Fungi Nested Plot")
+#add stats as margin text
+mtext("Nested Temp=42.5, P=0.001")
+#plot the Bacteria nested figure, suppress taxon names
+plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "purple"), lwd=3, main="Bacteria Nested Plot")
+#add stats are margin text
+mtext("Nested Temp=39.8, P=0.001")
+dev.off()
+```
