@@ -9,7 +9,7 @@ if (!require('knitr')) install.packages('knitr'); library('knitr')
 knitr::opts_chunk$set(warning=FALSE, message=FALSE)
 ```
 
-```{r, SiteMap_Script_AustinGreene_04252019t}
+```{r, SiteMap_Script_AustinGreene. fig.show="hide", results="hide"}
 # Code by Austin Greene
 # Edited by Chris Wall
 
@@ -62,20 +62,21 @@ geo3$Site <- factor(geo3$Site) # Convert sites to factors, not critical
 Waimea_map_6_sizescaled <- Waimea_map_3 + # Existing map
   geom_raster(data = elev_raster_df, aes(x=x, y=y, fill=elev_raster_df$ned_waimea_NED_1)) + # Raster elevation data
   geom_point(data = geo3, aes(x=Long, y=Lat, size=Rain), fill="white", color="black", pch=21, alpha=0.5) + # Points for sites, scaled by mean-annual precipitation
-  scale_size_area() + # Scale by area. Scaling by size if you delete this line. 
   coord_cartesian() +  # Set to cartesian coordinates
   scale_fill_viridis(option = "plasma", alpha = 0.7) + # Set fill colors to be colorblind-friendly
   coord_fixed(1.3) + # Aspect ratio of cartesian coordinates is 1.3
   labs(x="Longitude", y="Latitude", size="Precipitation (mm/year)", fill="Elevation (m)") + # Labels
   theme_classic() # Classic minimalist theme
-
+```
+```{r, map, fig.align='center'}
 Waimea_map_6_sizescaled # Print the plot
 
 # Save the plot as a tiff image with 300 dpi. 
 # Setting to 6x6 inches of the plot with the expectation that this is 2x larger than publication size 
 # per publication guidelines (expected print size 3x3 in)
-ggsave("figures/Map6_SizeScaled.tiff", Waimea_map_6_sizescaled, height = 6, width = 6, units = "in", device = "tiff", dpi=300)
+ggsave("Map6_SizeScaled.tiff", Waimea_map_6_sizescaled, height = 6, width = 6, units = "in", device = "tiff", dpi=300)
 ```
+
 
 #### Mantel: fung, bact
 ```{r, fungibacteria_mantel}
