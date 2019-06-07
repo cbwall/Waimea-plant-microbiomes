@@ -56,7 +56,6 @@ geo3$Site <- factor(geo3$Site) # Convert sites to factors, not critical
 Waimea_map_6_sizescaled <- Waimea_map_3 + # Existing map
   geom_raster(data = elev_raster_df, aes(x=x, y=y, fill=elev_raster_df$ned_waimea_NED_1)) + # Raster elevation data
   geom_point(data = geo3, aes(x=Long, y=Lat, size=Rain), fill="white", color="black", pch=21, alpha=0.5) + # Points for sites, scaled by mean-annual precipitation
-  scale_size_area() + # Scale by area. Scaling by size if you delete this line. 
   coord_cartesian() +  # Set to cartesian coordinates
   scale_fill_viridis(option = "plasma", alpha = 0.7) + # Set fill colors to be colorblind-friendly
   coord_fixed(1.3) + # Aspect ratio of cartesian coordinates is 1.3
