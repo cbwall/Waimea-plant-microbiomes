@@ -68,13 +68,13 @@ Waimea_map_6_sizescaled <- Waimea_map_3 + # Existing map
   labs(x="Longitude", y="Latitude", size="Precipitation (mm/year)", fill="Elevation (m)") + # Labels
   theme_classic() # Classic minimalist theme
 ```
-```{r, map, fig.align='center'}
+```{r, map, fig.align='center', warning=FALSE}
 Waimea_map_6_sizescaled # Print the plot
 
 # Save the plot as a tiff image with 300 dpi. 
 # Setting to 6x6 inches of the plot with the expectation that this is 2x larger than publication size 
 # per publication guidelines (expected print size 3x3 in)
-ggsave("Map6_SizeScaled.tiff", Waimea_map_6_sizescaled, height = 6, width = 6, units = "in", device = "tiff", dpi=300)
+ggsave("figures/Map6_SizeScaled.tiff", Waimea_map_6_sizescaled, height = 6, width = 6, units = "in", device = "tiff", dpi=300)
 ```
 
 
