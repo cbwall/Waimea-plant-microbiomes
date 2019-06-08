@@ -2,10 +2,10 @@
 #For NMDS plots and heat maps by Sample Type
 library(ggplot2)
 library(fossil)
-library("phyloseq")
+library(phyloseq)
 library(vegan)
 library(RColorBrewer)
-library("plyr")
+library(plyr)
 library(devtools)
 library(ggpubr)
 library(gridExtra)
@@ -16,8 +16,7 @@ PS_normal<-readRDS("PS_normal")
 physeq1 <- readRDS("physeq1")  
 #read in rarified phyloseq data
 rarPhySeq <- readRDS("rarPhySeq") 
-#Remove site 9
-PS_normal=subset_samples(PS_normal, FieldSite!="s9")
+
 #read in normalized fungal taxa
 fungal_norm<-readRDS("fungal_PS_normal")
 #read in fungal phyloseq data
@@ -48,24 +47,24 @@ funhell.ord<-ordinate(fungal.hell, "NMDS", "bray")
 cbPalette1<- c("#F0E442","#D55E00","#E69F00","#009E73","#999999","#CC79A7","#000000","#56B4E9","#0072B2")
 #bacteria NMDS by sample type
 plot1<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", color="SampleType")+ theme(legend.position="none")  #coord_equal(ratio=2) + theme_bw()
-plot1+
+plot1 <- plot1+
   scale_fill_manual(values=cbPalette1) +  
   scale_colour_manual(values=cbPalette1)+
   stat_ellipse(geom="polygon",type="t", alpha=0.2, aes(fill=SampleType)) +
   theme(legend.position="none") + coord_equal(ratio=2)+
-  annotate_figure(plot1,
-                  top = text_grob("Bacteria", color = "black", face = "bold", size = 14))+
   theme_bw()
+annotate_figure(plot1,
+                  top = text_grob("Bacteria", color = "black", face = "bold", size = 14))
+
 #fungal NMDS by sample type
 plot2<-plot_ordination(fungal.hell, funhell.ord,type="samples", color="SampleType")
-plot2 +
+plot2 <- plot2 +
   scale_fill_manual(values=cbPalette1) +  
   scale_colour_manual(values=cbPalette1)+
   stat_ellipse(geom="polygon",type="t", alpha=0.2, aes(fill=SampleType)) +
-  theme(legend.position="none")  coord_equal(ratio=2)+
-  annotate_figure(plot2ell,op = text_grob("Fungi", color = "black", face = "bold", size = 14))
+  theme(legend.position="none") + coord_equal(ratio=2)+
   theme_bw()
-
+annotate_figure(plot2,top = text_grob("Fungi", color = "black", face = "bold", size = 14))
 
 ###################################
 ########HEATMAP PLOTS#############
@@ -99,14 +98,14 @@ phyobject.hellrar <- transform_sample_counts(rarPhySeq, sqrt)  ## I used rarPhys
 ## tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
 
 ##Pool all ESVs by Phylum 
-phy_dat <- tax_glom(phyobject.hell, taxrank="Phylum")   ## subsetting for Hellinger transformed normalized data
+phy_dat <- tax_glom(phyobj.hell, taxrank="Phylum")   ## subsetting for Hellinger transformed normalized data
 phy_dat1 <- tax_glom(phyobject.hellrar, taxrank="Phylum")   ## subsetting for Hellinger transformed rarified data
 phy_dat2 <- tax_glom(rarPhySeq, taxrank="Phylum") ## subsetting for rarPhySeq data
 phy_dat3 <- tax_glom(PS_normal, taxrank="Phylum") ## subsetting for normalized data
 
 ##Pool all ESVs by Order 
-ord_dat <- tax_glom(phyobject.hell, taxrank="Order")  
-ord_dat1 <- tax_glom(phyobject.hell1, taxrank="Order")   
+ord_dat <- tax_glom(phyobj.hell, taxrank="Order")  
+ord_dat1 <- tax_glom(phyobject.hellrar, taxrank="Order")   
 ord_dat2 <- tax_glom(rarPhySeq, taxrank="Order")
 ord_dat3 <- tax_glom(PS_normal, taxrank="Order")
 
