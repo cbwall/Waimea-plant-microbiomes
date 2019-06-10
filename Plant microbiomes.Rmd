@@ -92,6 +92,7 @@ require(ggplot2)
 
 #read normalized Bacteria Phylloseq object
 PS_normal=readRDS("data/PS_normal.gz")
+PS_normal<- subset_taxa(PS_normal, c(Kingdom != "unknown", Kingdom != "Eukaryota"))
 
 #read normalized Fungi Phylloseq object
 fungal_PS_normal=readRDS("data/fungal_PS_normal.gz")
@@ -116,6 +117,7 @@ hel.dist=phyloseq::distance(sqrt, "bray")
 
 #Calculate mantel
 m=mantel(hel.dist,funhel.dist)
+
 #make a dataframe for ggplot
 mantel=as.data.frame(cbind(c(hel.dist), c(funhel.dist)))
 
@@ -136,7 +138,6 @@ dev.off()
 ```
 
 #### Bacterial Abundance Occupancy
-*(problems here)*
 ```{r, Bacterial Abundance Occupancy}
 # Code by Anthony
 # modified by Feresa Corazon, Chris Wall
@@ -158,6 +159,8 @@ library("lattice")
 ###################################
 
 rarPhySeq=readRDS("data/rarPhySeq.gz")
+rarPhySeq<- subset_taxa(rarPhySeq, c(Kingdom != "unknown", Kingdom != "Eukaryota"))
+
 #Calculate distance to shore
 sample_data(rarPhySeq)$Shore_dist=pointDistance(cbind(sample_data(rarPhySeq)$Long,sample_data(rarPhySeq)$Lat), c(-158.062848, 21.640741),lonlat=TRUE)
 
@@ -486,23 +489,32 @@ dev.off()
 #To produce nestedness plots
 require(phyloseq)
 require(bipartite)
+
 #read in rarefied Bacteria data
 rarPhySeq=readRDS("data/rarPhySeq.gz")
+rarPhySeq<- subset_taxa(rarPhySeq, c(Kingdom != "unknown", Kingdom != "Eukaryota"))
+
 #Merge samples by sample type
 agg=merge_samples(rarPhySeq, "SampleType")
+
 #convert to dataframe
 aggtab=as.data.frame(otu_table(agg))
+
 #calculate nested temperature
 nested=nestedtemp(aggtab)
 
 #read in Fungal data (not rarefied)
 fungalphyseq1=readRDS("data/fungal_physeq1.gz")
+
 #rarefy to 20000 sequences (drops 3 samples :())
 funrarPhySeq=rarefy_even_depth(fungalphyseq1, sample.size=20000)
+
 #merge by sample type
 funagg=merge_samples(funrarPhySeq, "SampleType")
+
 #convert to dataframe
 funaggtab=as.data.frame(otu_table(funagg))
+
 #calculate nested temp
 funnested=nestedtemp(funaggtab)
 
@@ -516,6 +528,7 @@ par(mfrow=c(2,1), mai=c(.1,1.,1,1), oma=c(.1,1,.1,1))
 plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "green"), lwd=3, main="Fungi Nested Plot")
 #add stats as margin text
 mtext("Nested Temp=42.5, P=0.001")
+
 #plot the Bacteria nested figure, suppress taxon names
 plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "purple"), lwd=3, main="Bacteria Nested Plot")
 #add stats are margin text
@@ -548,7 +561,7 @@ require(ggplot2)
 
 # Load RDS file of normalized bacterial reads
 PS_normal = readRDS("data/PS_normal.gz") #"PS_normal"
-
+PS_normal<- subset_taxa(PS_normal, c(Kingdom != "unknown", Kingdom != "Eukaryota"))
 
 # Hellinger (square root) transform the data!
 PS_normal.hell = transform_sample_counts(PS_normal, function(x) x^0.5)
@@ -765,7 +778,6 @@ cor.p = rbind(bact.cor.p, fung.cor.p)
 results = merge(results, cor.p)
 
 
-
 #Add overall test (all parts together) to data frame
 results2 = rbind( results, data.frame( type = c('Bacterial', 'Fungal'), Part = rep('All',2),
 	mant_cor = c(all_bacteria_mantel$statistic, fall_mantel$statistic), 
@@ -777,8 +789,6 @@ results2 = rbind( results, data.frame( type = c('Bacterial', 'Fungal'), Part = r
 write.csv(results2, file = 'output/Mantel_Plant_Part_Results_Hell_Bray.csv')
 
 
-
-
 ####################################################
 ################### Slopes plot ####################
 ####################################################
@@ -787,8 +797,6 @@ write.csv(results2, file = 'output/Mantel_Plant_Part_Results_Hell_Bray.csv')
 # The colorblind friendly palette with grey:
 cbPalette = c('#999999', '#E69F00', '#56B4E9', 
 	'#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7')
-
-
 
 ###################
 #### Bacterial ####
@@ -900,15 +908,20 @@ library("vegan")
 
 ##PERMANOVA Bacteria
 PS_normal = readRDS("data/PS_normal.gz")
+
 PS_normal=transform_sample_counts(PS_normal, function(x) x^0.5)
-PS_normal = subset_taxa(PS_normal, Order!="Chloroplast")
-PS_normal = subset_taxa(PS_normal, Kingdom!="Archaea")
-PS_normal = subset_taxa(PS_normal, Family!="Mitochondria")
-PS_normal = subset_taxa(PS_normal, Kingdom!="Unknown")
+
+PS_normal = subset_taxa(PS_normal, c(
+                          Order!="Chloroplast", 
+                          Kingdom!="Archaea",
+                          Family!="Mitochondria",
+                          Kingdom!="Unknown",
+                          Kingdom!="Eukaryota"))
+
+
 #Use base boxplot functin to look at sequencing depth
 boxplot(sample_sums(PS_normal)~sample_data(PS_normal)$FieldSite)
 boxplot(sample_sums(PS_normal)~sample_data(PS_normal)$SampleType)
-
 
 #Bacterial ALL
 Gradient <- PS_normal@sam_data$rain
@@ -950,14 +963,21 @@ devtools::install_bitbucket("graumannlabtools/multipanelfigure")
 
 #read in normalized bacterial data
 PS_normal<-readRDS("data/PS_normal.gz")
+PS_normal<- subset_taxa(PS_normal, c(Kingdom != "unknown", Kingdom != "Eukaryota"))
+
 #read in bacteria phyloseq data
 physeq1 <- readRDS("data/physeq1.gz")  
+
 #read in rarified phyloseq data
 rarPhySeq <- readRDS("data/rarPhySeq.gz") 
+rarPhySeq<- subset_taxa(rarPhySeq, c(Kingdom != "unknown", Kingdom != "Eukaryota"))
+
 #read in normalized fungal taxa
 fungal_norm<-readRDS("data/fungal_PS_normal.gz")
+
 #read in fungal phyloseq data
 funphys <- readRDS("data/fungal_physeq1.gz") 
+
 #read in rarified phyloseq data
 rarfun <- readRDS("data/fungal_rarPhySeq.gz")
 
@@ -965,6 +985,7 @@ rarfun <- readRDS("data/fungal_rarPhySeq.gz")
 ##########NMDS PLOTS##############
 #hellinger transform bacteria
 phyobj.hell=transform_sample_counts(PS_normal, function(x) x^0.5)
+
 #hellinger transform fungus
 fungal.hell<-transform_sample_counts(fungal_norm,  function(x) x^0.5)
 

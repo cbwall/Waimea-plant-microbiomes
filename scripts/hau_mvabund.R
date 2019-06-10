@@ -27,11 +27,13 @@ memory.limit(100000)	#May be necessary for faster manyglm runs
 ###BACTERIAL DATA
 
 rarPhySeq = readRDS("data/rarPhySeq")	#Read in rarefied count data
+rarPhySeq <- subset_taxa(rarPhySeq, Kingdom != "unknown")	#Remove unclassified kingdoms
+rarPhySeq <- subset_taxa(rarPhySeq, Kingdom != "Eukaryota")	#Remove eukaryotes
 bac_count_df <- psmelt(rarPhySeq)	#Make it an ordinary dataframe, not phyloseq
 bac_count_df$taxon <- paste(bac_count_df$Class, bac_count_df$OTU)	#Create field combining OTU and Class
 str(bac_count_df)	#Check structure
 write.csv(bac_count_df, file = "data/mvabund/bac_count_df.csv", row.names = F)	#Save
-#bac_count_df <- read.csv("data/mvabund/bac_count_df.csv", header = T)	#Read in if saved
+#bac_count_df <- read.csv("bac_count_df.csv", header = T)	#Read in if saved
 
 
 ##Subsample bacterial dataframe
@@ -196,7 +198,7 @@ bac_stem <- manyglm(sub_bac ~ sub_bacteria$SampleType=="Stem",
 bac_stem.anova <- anova(bac_stem, nBoot = 1000, p.uni = "unadjusted",
 	test = "LR", resamp = "montecarlo")	#Perform ANOVA on manyglm
 bac_stem.df <- as.data.frame(bac_stem.anova$uni.p)	#Access p-values
-write.csv(bac_stem.df, file = "output/mvabund/bac_stem.df", row.names = F)	#Save p-values
+write.csv(bac_stem.df, file = "output/mvabund/bac_stem.df.csv", row.names = F)	#Save p-values
 bac_stem_spp = colnames(bac_stem.df)[bac_stem.df[2,]<=0.05]	#Select significant p-values
 write.csv(bac_stem_spp, file = "output/mvabund/bac_stem_spp.csv", row.names = F)	#Save list of significant ESVs
 bac_stem.pi <- pi0est(p = bac_stem.anova$uni.p,
