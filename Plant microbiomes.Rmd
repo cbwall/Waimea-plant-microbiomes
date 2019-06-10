@@ -1462,6 +1462,7 @@ b_res
 
 taxonomy<- read.delim("metadata/consensus_taxonomy.txt", sep="")
 fungi_taxonomy <- taxonomy[(taxonomy$Kingdom=="Fungi"), ]
+
 bacteria_taxonomy <- read.table(file = 'metadata/taxonomic_assignments_esv.tsv', sep = '\t', header = TRUE)
 bacteria_taxonomy <- bacteria_taxonomy[(bacteria_taxonomy$Kingdom=="Bacteria"),]
 
