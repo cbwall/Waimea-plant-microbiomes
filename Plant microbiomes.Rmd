@@ -1420,9 +1420,10 @@ f_allCounts <- read.csv("output/volcano/abundance_table_esv_volcanoPlot.csv", ro
 b_allCounts <- read.csv("output/volcano/abundance_ESV_bacteria.csv", row.names=1, quote="")
 
 #import metadata for fungi and bacteria
-f_conditions <- as.matrix(read.csv("output/volcano/VP_Fungi_Metadata.csv", sep = ",", header = TRUE))
+metadata<- read.csv("metadata/FIXED BOT662_Metadata.csv")
 
-b_conditions <- as.matrix(read.csv("output/volcano/VP_Bacteria_Metadata.csv", sep = ",", header = TRUE))
+f_conditons<- metadata[(metadata$Locus=="fungalITS"),]
+b_conditions <- metadata[(metadata$Locus=="bacterial16S"),]
 
 #construct DESeqDataSet Object
 f_dds <- DESeqDataSetFromMatrix(countData = f_allCounts, colData = f_conditions, design = ~FieldSite)
@@ -1458,8 +1459,11 @@ b_res
 
 #match results with corresponding ID's for volcano plot
 #import taxonomy information
-fungi_taxonomy <- read.csv("output/volcano/consensus_taxonomy.csv")
-bacteria_taxonomy <- read.csv("output/volcano/bacteria_parametricDESeq_AllOTU.csv") 
+
+taxonomy<- read.delim("metadata/consensus_taxonomy.txt", sep="")
+fungi_taxonomy <- taxonomy[(taxonomy$Kingdom=="Fungi"), ]
+bacteria_taxonomy <- read.table(file = 'metadata/taxonomic_assignments_esv.tsv', sep = '\t', header = TRUE)
+bacteria_taxonomy <- bacteria_taxonomy[(bacteria_taxonomy$Kingdom=="Bacteria"),]
 
 #check that data imported properly
 View(fungi_taxonomy)
