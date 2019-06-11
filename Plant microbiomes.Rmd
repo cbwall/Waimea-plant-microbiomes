@@ -1486,8 +1486,7 @@ b_res.df.tax <- merge(b_res.df, bacteria_taxonomy, by="OTU_ID")
 
 #create fungi volcano plot of significant classes using ggplot
 #create top significant classes from fungi res data
-f_significant_classes <- c("Agaricomycetes","Dothideomycetes","Eurotiomycetes",
-                           "Lecanoromycetes","Mortierellomycetes","Sordariomycetes","Tremellomycetes")
+f_significant_classes <- c("Agaricomycetes","Dothideomycetes","Mortierellomycetes","Sordariomycetes","Tremellomycetes")
 
 #subset significant classes from merged data frames
 f_res.df.tax.significant <- f_res.df.tax %>%
@@ -1511,10 +1510,7 @@ ggplot(data=f_res.df.tax.significant) +
   
 #create bacteria volcano plot of significant classes using ggplot
 #create top significant classes from bacteria res data
-b_significant_classes <- c("Acidimicrobiia","Acidobacteriia","Actinobacteria","Alphaproteobacteria", 
-"Anaerolineae","Bacteroidia","Blastocatellia","Chloroflexia","Deltaproteobacteria","Gammaproteobacteria", 
-"Gemmatimondadetes","Latescibacteria_cl","NC10", "OM190","Oxyphotobacteria","Phycisphaerae","Planctomycetacia",
-"Thermoleophilia","Verrucomicrobiae")
+b_significant_classes <- c("Acidimicrobiia", "Anaerolineae","Blastocatellia","Chloroflexia", "Gemmatimondadetes","Latescibacteria_cl","NC10", "Oxyphotobacteria","Phycisphaerae","Planctomycetacia")
 
 #subset significant classes from merged data frames
 b_res.df.tax.significant <- b_res.df.tax %>%
