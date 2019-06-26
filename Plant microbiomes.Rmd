@@ -1039,148 +1039,6 @@ dev.copy(png, "figures/NMDS_Fungi.png", units="in", width=6, height=6, res=300)
 dev.off() 
 
 
-###################################
-########HEATMAP PLOTS#############
-
-####BACTERIA 16S###############
-##Substitute all of the FieldSite 10 into 9 in all datasets 
-a <- gsub("s10", "s9", (sample_data(PS_normal)$FieldSite))
-b <- gsub("s10", "s9", (sample_data(physeq1)$FieldSite))
-c <- gsub("s10", "s9", (sample_data(rarPhySeq)$FieldSite))
-##Replace old fieldsite names with new fieldsite names in all datasets
-a = sample_data(PS_normal)$FieldSite 
-b = sample_data(physeq1)$FieldSite 
-c = sample_data(rarPhySeq)$FieldSite 
-##Organize sample type by levels of ground to air in all datasets
-sample_data(PS_normal)$SampleType = factor(sample_data(PS_normal)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-sample_data(physeq1)$SampleType = factor(sample_data(physeq1)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-sample_data(rarPhySeq)$SampleType = factor(sample_data(rarPhySeq)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-
-###############################################################################################
-###Hellinger Transform Data###
-###############################################################################################
-
-##Hellinger transform data with Square root for any phyloseq dataset
-phyobject.hellrar <- transform_sample_counts(rarPhySeq, function(x) x^0.5)  ## I used rarPhyseq because it looked the best for ITS data
-
-###############################################################################################
-###Subset Data###
-###############################################################################################
-
-## NOTE: Can put any physeq dataset (i.e. PS_normal, physeq1, rarPhySeq, phyobject.hell) into tax_glom(physeqobject, taxrank = "Rank you want to subset to") to subset
-## tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
-
-##Pool all ESVs by Phylum 
-phy_dat <- tax_glom(phyobj.hell, taxrank="Phylum")   ## subsetting for Hellinger transformed normalized data
-phy_dat1 <- tax_glom(phyobject.hellrar, taxrank="Phylum")   ## subsetting for Hellinger transformed rarified data
-phy_dat2 <- tax_glom(rarPhySeq, taxrank="Phylum") ## subsetting for rarPhySeq data
-phy_dat3 <- tax_glom(PS_normal, taxrank="Phylum") ## subsetting for normalized data
-
-##Pool all ESVs by Order 
-ord_dat <- tax_glom(phyobj.hell, taxrank="Order")  
-ord_dat1 <- tax_glom(phyobject.hellrar, taxrank="Order")   
-ord_dat2 <- tax_glom(rarPhySeq, taxrank="Order")
-ord_dat3 <- tax_glom(PS_normal, taxrank="Order")
-
-
-## NOTE: Can put any Subsetted physeq dataset (i.e. phy_dat, ord_dat, etc.) or non-subsetted physeq dataset (i.e. physeq1, PS_normal, etc.) into plot_heatmap(physeqobject, ...)
-## NOTE: If using a subsetted physeq dataset, make sure set the taxa.label = taxrank for whichever taxonomic rank you make heatmap for
-
-##Ploting heatmap for Order in rarPhySeq subsetted data###
-
-##Plot the heatmap clustering by NMDS and Bray curtis distance, labeling sample type and supressing Taxon labels
-p1 <- plot_heatmap(phy_dat3, "NMDS", "bray", sample.label = "SampleType", sample.order= "FieldSite", taxa.label="Phylum", low = "yellow", high = "red", na.value= "white")
-
-##Plot Heatmap organized by Fieldsites (1-9) and grouped by SampleType
-q1 <- p1+ facet_grid(~SampleType, scales= "free_x", switch = "x")
-
-##Plot Heatmap with tick marks and FieldSite labels removed
-q2 <- q1 + theme(
-  axis.text.x = element_blank(),
-  axis.ticks = element_blank()
-) 
-plot(q2)
-
-
-#########FUNGAL ITS##################
-
-##Substitute all of the FieldSite 10 into 9 in all datasets 
-d <- gsub("s10", "s9", (sample_data(fungal_norm)$FieldSite))
-e <- gsub("s10", "s9", (sample_data(funphys)$FieldSite))
-f <- gsub("s10", "s9", (sample_data(rarfun)$FieldSite))
-
-##Replace old fieldsite names with new fieldsite names in all datasets
-d = sample_data(fungal_norm)$FieldSite 
-e = sample_data(funphys)$FieldSite 
-f = sample_data(rarfun)$FieldSite 
-
-##Organize sample type by levels of ground to air in all datasets
-sample_data(fungal_norm)$SampleType = factor(sample_data(fungal_norm)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-sample_data(funphys)$SampleType = factor(sample_data(funphys)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-sample_data(rarfun)$SampleType = factor(sample_data(rarfun)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-
-###############################################################################################
-###Hellinger Transform Data###
-###############################################################################################
-
-##Hellinger transform data with Square root for any phyloseq dataset
-rarfun.hell <- transform_sample_counts(rarfun, function(x) x^0.5)  ## I used rarfun because it looked the best for ITS data
-
-###############################################################################################
-###Subset Data###
-###############################################################################################
-
-## NOTE: Can put any physeq dataset (i.e. fungal_norm, funphys, rarfun, phyobject.hell) into tax_glom(physeqobject, taxrank = "Rank you want to subset to") to subset
-## tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
-
-##Pool all ESVs by Phylum 
-funphy_dat <- tax_glom(rarfun.hell, taxrank="Phylum")   ## can replace "phyobject.hell" with any physeq object
-funphy_dat1 <- tax_glom(rarfun, taxrank="Phylum")
-funphy_dat2<- tax_glom(fungal.hell, taxrank= "Phylum")
-
-##Pool all ESVs by Order 
-funord_dat <- tax_glom(rarfun.hell, taxrank="Order")
-funord_dat1 <- tax_glom(rarfun, taxrank="Order")
-funord_dat2 <- tax_glom(fungal.hell, taxrank="Order")
-
-##Pool all ESVs by Class 
-funclass_dat <- tax_glom(rarfun.hell, taxrank="Class")
-funclass_dat1 <- tax_glom(rarfun, taxrank="Class")
-##Pool all ESVs by Family
-funfam_dat <- tax_glom(rarfun.hell, taxrank="Family")
-
-
-##Pool all ESVs by Genus 
-fungen_dat <- tax_glom(rarfun.hell, taxrank="Genus")
-
-###############################################################################################
-###Plot Heatmap###
-###############################################################################################
-
-## NOTE: Can put any Subsetted physeq dataset (i.e. phy_dat, ord_dat, etc.) or non-subsetted physeq dataset (i.e. funphys, fungal_norm, etc.) into plot_heatmap(physeqobject, ...)
-## NOTE: If using a subsetted physeq dataset, make sure set the taxa.label = taxrank for whichever taxonomic rank you make heatmap for
-
-##Ploting heatmap for Order in rarfun subsetted data###
-
-##Plot the heatmap clustering by NMDS and Bray curtis distance, labeling sample type and supressing Taxon labels
-fp1 <- plot_heatmap(funord_dat1, "NMDS", "bray", sample.label = "SampleType", sample.order= "FieldSite", taxa.label="Order", low = "yellow", high = "red", na.value= "white")
-
-##Plot Heatmap organized by Fieldsites (1-9) and grouped by SampleType
-fq1 <- fp1+ facet_grid(~SampleType,scales= "free_x", switch = "x")
-
-##Plot Heatmap with tick marks and FieldSite labels removed
-fq2 <- fq1 + theme(
-  axis.text.x = element_blank(),
-  axis.ticks = element_blank()
-) 
-plot(fq2)
-dev.copy(png, "figures/Heat_Order_Site", units="in", width=8, height=6, res=300)
-dev.off()
-
-###################################################################################################################
-##################### BELOW HERE I AM LOST ON HOW TO MAKE PRETTY FIGURE############################################
-
-
 ####MAKING A COMPOSITE FIGURE#########
 nmds<- ggarrange(plot1,plot2 + rremove("x.text"), common.legend = TRUE, legend="bottom", ncol=1, nrow=2)
 heatmaps<-ggarrange(q2+rremove("xlab"),fq2 + rremove("xlab"), common.legend = FALSE, legend="right", ncol=1, nrow=2)
@@ -1191,372 +1049,92 @@ ggdraw() +
   draw_plot_label(label = c("A", "B", "C"), size = 15,
                   x = c(0, 0.5, 0), y = c(1, 1, 0.5))
 plot(fullfig)         
-
-
-
-######THIS IS ANTHONY'S CODE FOR EPS FILE##################################
-
-#create EPS file
-setEPS()
-#using a postscript device
-postscript("nestedplots.eps")
-#make a two row composite figure, reguce spacing between inner and outer margins
-par(mfrow=c(2,1), mai=c(.1,1.,1,1), oma=c(.1,1,.1,1))
-#plot the fungal nested figure, suppress taxon names
-plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "green"), lwd=3, main="Fungi Nested Plot")
-#add stats as margin text
-mtext("Nested Temp=42.5, P=0.001")
-#plot the Bacteria nested figure, suppress taxon names
-plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "purple"), lwd=3, main="Bacteria Nested Plot")
-#add stats are margin text
-mtext("Nested Temp=39.8, P=0.001")
-dev.off()
 ```
 
-#### 16S heatmap
-```{r, Heatmap 16S, results="hide"}
-##Helen Sung
-##Creating Heatmaps for 16s Bacterial Data 
-
-###############################################################################################
-####HEAT MAP ITS DATA####
-###############################################################################################
-
-require(phyloseq)
-require(RColorBrewer)
-require(ggplot2)
-require(plyr)
-
-###############################################################################################
-###Load R phyloseq files###
-###############################################################################################
-
-PS_normal <- readRDS("data/PS_normal.gz") ## normalized phyloseq data
-physeq1 <- readRDS("data/physeq1.gz")     ## phyloseq data
-rarPhySeq <- readRDS("data/rarPhySeq.gz") ## rarified phyloseq data 
-
-###############################################################################################
-###Fix Data to properly format for Heatmaps###
-###############################################################################################
-
-##Substitute all of the FieldSite 10 into 9 in all datasets 
-a <- gsub("10", "9", (sample_data(PS_normal)$FieldSite))
-b <- gsub("10", "9", (sample_data(physeq1)$FieldSite))
-c <- gsub("10", "9", (sample_data(rarPhySeq)$FieldSite))
-
-##Replace old fieldsite names with new fieldsite names in all datasets
-a = sample_data(PS_normal)$FieldSite 
-b = sample_data(physeq1)$FieldSite 
-c = sample_data(rarPhySeq)$FieldSite 
-
-##Organize sample type by levels of ground to air in all datasets
-sample_data(PS_normal)$SampleType = factor(sample_data(PS_normal)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-
-sample_data(physeq1)$SampleType = factor(sample_data(physeq1)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-
-sample_data(rarPhySeq)$SampleType = factor(sample_data(rarPhySeq)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-
-###############################################################################################
-###Hellinger Transform Data###
-###############################################################################################
-
-##Hellinger transform data with Square root for any phyloseq dataset
-phyobject.hell <- transform_sample_counts(rarPhySeq, function(x) x^0.5)  ## I used rarPhyseq because it looked the best for ITS data
-
-phyobject.hell1 <- transform_sample_counts(PS_normal, function(x) x^0.5)  ## I used rarPhyseq because it looked the best for ITS data
-###############################################################################################
-###Subset Data###
-###############################################################################################
-
-## NOTE: Can put any physeq dataset (i.e. PS_normal, physeq1, rarPhySeq, phyobject.hell) into tax_glom(physeqobject, taxrank = "Rank you want to subset to") to subset
-## tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
-
-##Pool all ESVs by Phylum 
-phy_dat <- tax_glom(phyobject.hell, taxrank="Phylum")   ## subsetting for Hellinger transformed rarified data
-phy_dat1 <- tax_glom(phyobject.hell1, taxrank="Phylum")   ## subsetting for Hellinger transformed normalized data
-phy_dat2 <- tax_glom(rarPhySeq, taxrank="Phylum") ## subsetting for rarPhySeq data
-phy_dat3 <- tax_glom(PS_normal, taxrank="Phylum") ## subsetting for normalized data
-
-##Pool all ESVs by Order 
-ord_dat <- tax_glom(phyobject.hell, taxrank="Order")  
-ord_dat1 <- tax_glom(phyobject.hell1, taxrank="Order")   
-ord_dat2 <- tax_glom(rarPhySeq, taxrank="Order")
-ord_dat3 <- tax_glom(PS_normal, taxrank="Order")
-
-
-###############################################################################################
-###Plot Heatmap###
-###############################################################################################
-
-## NOTE: Can put any Subsetted physeq dataset (i.e. phy_dat, ord_dat, etc.) or non-subsetted physeq dataset (i.e. physeq1, PS_normal, etc.) into plot_heatmap(physeqobject, ...)
-## NOTE: If using a subsetted physeq dataset, make sure set the taxa.label = taxrank for whichever taxonomic rank you make heatmap for
-
-##Ploting heatmap for Order in rarPhySeq subsetted data###
-
-##Plot the heatmap clustering by NMDS and Bray curtis distance, labeling sample type and supressing Taxon labels
-p1 <- plot_heatmap(phy_dat3, "NMDS", "bray", sample.label = "SampleType", sample.order= "FieldSite", taxa.label="Phylum", low = "yellow", high = "red", na.value= "white")
-##Plot Heatmap organized by Fieldsites (1-9) and grouped by SampleType
-q1 <- p1+ facet_grid(~SampleType, scales= "free_x", switch = "x")
-##Plot Heatmap with tick marks and FieldSite labels removed
-q2 <- q1 + theme(
-  axis.text.x = element_blank(),
-  axis.ticks = element_blank()
-  ) 
-plot(q2)
-
-##Save Heatmap as .tiff file 
-tiff("figures/16s_phylum_heatmap_PSnorm.tiff", units="in", width=12, height=12, res=300) ## Change "ITS_order_heatmap.tiff" to whatever title for the file you choose
-plot(q2)
-dev.off()
-```
+#### 16S and ITS heatmap
 ```{r, fungal heat map, results="hide"}
-##Helen Sung
-##Creating Heatmaps for ITS Fungal Data 
+####HEAT MAP DATA####
 
-PS_normal <- readRDS("data/fungal_PS_normal.gz") ## normalized phyloseq data
-physeq1 <- readRDS("data/fungal_physeq1.gz")     ## phyloseq data
-rarPhySeq <- readRDS("data/fungal_rarPhySeq.gz") ## rarified phyloseq data 
+##Helen Sung, edited by Jared Bernard
 
-###############################################################################################
-###Fix Data to properly format for Heatmaps###
-###############################################################################################
-
-##Substitute all of the FieldSite 10 into 9 in all datasets 
-a <- gsub("10", "9", (sample_data(PS_normal)$FieldSite))
-b <- gsub("10", "9", (sample_data(physeq1)$FieldSite))
-c <- gsub("10", "9", (sample_data(rarPhySeq)$FieldSite))
-
-##Replace old fieldsite names with new fieldsite names in all datasets
-a = sample_data(PS_normal)$FieldSite 
-b = sample_data(physeq1)$FieldSite 
-c = sample_data(rarPhySeq)$FieldSite 
-
-##Organize sample type by levels of ground to air in all datasets
-sample_data(PS_normal)$SampleType = factor(sample_data(PS_normal)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-sample_data(physeq1)$SampleType = factor(sample_data(physeq1)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-sample_data(rarPhySeq)$SampleType = factor(sample_data(rarPhySeq)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
-
-###############################################################################################
-###Hellinger Transform Data###
-###############################################################################################
-
-##Hellinger transform data with Square root for any phyloseq dataset
-phyobject.hell <- transform_sample_counts(rarPhySeq, function(x) x^0.5)  ## I used rarPhyseq because it looked the best for ITS data
-
-###############################################################################################
-###Subset Data###
-###############################################################################################
-
-## NOTE: Can put any physeq dataset (i.e. PS_normal, physeq1, rarPhySeq, phyobject.hell) into tax_glom(physeqobject, taxrank = "Rank you want to subset to") to subset
-## tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
-
-##Pool all ESVs by Phylum 
-phy_dat <- tax_glom(phyobject.hell, taxrank="Phylum")   ## can replace "phyobject.hell" with any physeq object
-phy_dat1 <- tax_glom(rarPhySeq, taxrank="Phylum")
-
-##Pool all ESVs by Order 
-ord_dat <- tax_glom(phyobject.hell, taxrank="Order")
-ord_dat1 <- tax_glom(rarPhySeq, taxrank="Order")
-
-##Pool all ESVs by Class 
-class_dat <- tax_glom(phyobject.hell, taxrank="Class")
-
-##Pool all ESVs by Family
-fam_dat <- tax_glom(phyobject.hell, taxrank="Family")
-
-##Pool all ESVs by Genus 
-gen_dat <- tax_glom(phyobject.hell, taxrank="Genus")
-
-###############################################################################################
-###Plot Heatmap###
-###############################################################################################
-
-## NOTE: Can put any Subsetted physeq dataset (i.e. phy_dat, ord_dat, etc.) or non-subsetted physeq dataset (i.e. physeq1, PS_normal, etc.) into plot_heatmap(physeqobject, ...)
-## NOTE: If using a subsetted physeq dataset, make sure set the taxa.label = taxrank for whichever taxonomic rank you make heatmap for
-
-##Ploting heatmap for Order in rarPhySeq subsetted data###
-
-##Plot the heatmap clustering by NMDS and Bray curtis distance, labeling sample type and supressing Taxon labels
-p1 <- plot_heatmap(ord_dat1, "NMDS", "bray", sample.label = "SampleType", sample.order= "FieldSite", taxa.label="Order", low = "yellow", high = "red", na.value= "white")
-##Plot Heatmap organized by Fieldsites (1-9) and grouped by SampleType
-q1 <- p1+ facet_grid(~SampleType, scales= "free_x", switch = "x")
-##Plot Heatmap with tick marks and FieldSite labels removed
-q2 <- q1 + theme(
-  axis.text.x = element_blank(),
-  axis.ticks = element_blank()
-  ) 
-plot(q2)
-
-##Save Heatmap as .tiff file 
-tiff("figures/ITS_order_heatmap.tiff", units="in", width=12, height=12, res=300) ## Change "ITS_order_heatmap.tiff" to whatever title for the file you choose
-plot(q2)
-dev.off()
-```
-
-#### Volcano plot  
-not yet resolved. Need code that generates the abundance table esv files. Once start code is in, the csvs should be put in the *output* folder and called from there.  
-
-```{r, volcano plot, results="hide"}
-#Code by Melissa Atkins
-#Purpose: Differential abundance of ESVs by gradient in fungi and bacteria by class
-#DESeq Script
-
-#load libraries
-
+##Load packages (automatically install if needed)
 if(!requireNamespace("BiocManager", quietly = TRUE))
 	install.packages("BiocManager")	#Load packages from Bioconductor
-if(!require(DESeq2)){
-	BiocManager::install("DESeq2")
-	library(DESeq2)}
+if(!require(phyloseq)){
+	BiocManager::install("phyloseq")
+	library(phyloseq)}
+if(!require("pacman")){
+	install.packages("pacman")
+	library(pacman)}
+p_load("plyr", "ggplot2", "mvabund", "viridis")
 
-require(phyloseq)
-require(ggplot2)
-require(dplyr)
-require(viridis)
+###Load phyloseq files###
+bacteria <- readRDS("data/PS_normal.gz") ## normalized phyloseq data
+bacteria <- subset_taxa(bacteria, Kingdom != "unknown")	#Remove unclassified kingdoms
+bacteria <- subset_taxa(bacteria, Kingdom != "Eukaryota")	#Remove eukaryotes
+bacteria <- subset_taxa(bacteria, Kingdom=="Bacteria")
 
-#import abundance data for fungi and bacteria
-f_allCounts <- read.csv("output/volcano/abundance_table_esv_volcanoPlot.csv", row.names=1, quote="")
+fungi <- readRDS("data/fungal_PS_normal.gz") ## normalized phyloseq data
+fungi <- subset_taxa(fungi, Kingdom=="Fungi")
 
-b_allCounts <- read.csv("output/volcano/abundance_ESV_bacteria.csv", row.names=1, quote="")
+###Fix Data to properly format for Heatmaps###
+##Substitute all of the FieldSite 10 into 9 in all datasets 
+gsub("10", "9", (sample_data(bacteria)$FieldSite))
+gsub("10", "9", (sample_data(fungi)$FieldSite))
 
-#import metadata for fungi and bacteria
-metadata<- read.csv("metadata/FIXED BOT662_Metadata.csv")
+##Replace old fieldsite names with new fieldsite names in all datasets
+sample_data(bacteria)$FieldSite 
+sample_data(fungi)$FieldSite 
 
-f_conditons<- metadata[(metadata$Locus=="fungalITS"),]
-b_conditions <- metadata[(metadata$Locus=="bacterial16S"),]
+##Organize sample type by levels of ground to air in all datasets
+sample_data(bacteria)$SampleType = factor(sample_data(bacteria)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
+sample_data(fungi)$SampleType = factor(sample_data(fungi)$SampleType, levels = c('Soil', 'Root', 'Stem', 'Axil', 'Petiole', 'Leaf','Litter','Air'))
 
-#construct DESeqDataSet Object
-f_dds <- DESeqDataSetFromMatrix(countData = f_allCounts, colData = f_conditions, design = ~FieldSite)
-b_dds <- DESeqDataSetFromMatrix(countData = b_allCounts, colData = b_conditions, design = ~FieldSite)
+###Subset Data###
+# NOTE: Can put any physeq dataset (i.e. PS_normal, physeq1, rarPhySeq, phyobject.hell) into tax_glom(physeqobject, taxrank = "Rank you want to subset to") to subset
+# tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
 
-#check dds object
-f_dds
-b_dds
+##Pool all ESVs by Class 
+class_dat <- tax_glom(bacteria, taxrank="Class") ## subsetting for normalized data
+funclass <- tax_glom(fungi, taxrank="Class")
 
-#set the factor levels for a control condition
-f_dds$FieldSite <- relevel(f_dds$FieldSite, "s1","s2","s3")
-b_dds$FieldSite <- relevel(b_dds$FieldSite, "s1","s2","s3")
+###Plot Heatmap###
+# NOTE: Can put any Subsetted physeq dataset (i.e. phy_dat, ord_dat, etc.) or non-subsetted physeq dataset (i.e. physeq1, PS_normal, etc.) into plot_heatmap(physeqobject, ...)
+# NOTE: If using a subsetted physeq dataset, make sure set the taxa.label = taxrank for whichever taxonomic rank you make heatmap for
 
-#transform data to deal with 0's using geoMeans in DESeq
-f_counts <- counts(f_dds)
-geoMeans = apply(f_counts, 1, function(row) if (all(row == 0)) 0 else exp(mean(log(row[row != 0]))))
-f_ddsGeo <- estimateSizeFactors(f_dds, geoMeans=geoMeans)
-b_counts <- counts(b_dds)
-geoMeans = apply(b_counts, 1, function(row) if (all(row == 0)) 0 else exp(mean(log(row[row != 0]))))
-b_ddsGeo <- estimateSizeFactors(b_dds, geoMeans=geoMeans)
+#Plot bacterial heatmap clustering by NMDS and Bray curtis distance, labeling sample type and supressing Taxon labels
+b1 <- plot_heatmap(class_dat, "NMDS", "bray", sample.label = "SampleType", sample.order= "FieldSite", taxa.label="Class", low = "#3CBB75FF", high = "#440154FF", na.value= "white")
+#Organize by field sites and grouped by sample type
+d1 <- b1+ facet_grid(~SampleType, scales= "free_x", switch = "x")
+#Plot Heatmap with tick marks and FieldSite labels removed
+d2 <- d1 + theme(
+  axis.text.x = element_blank(),
+  axis.ticks = element_blank()
+  ) 
+plot(d2)
 
-#Begin analysis
-f_dds <- DESeq(f_ddsGeo)
-b_dds <- DESeq(b_ddsGeo)
-
-#get results
-f_res <- results(f_dds)
-b_res <- results(b_dds)
-
-#check results
-f_res
-b_res
-
-#match results with corresponding ID's for volcano plot
-#import taxonomy information
-
-taxonomy<- read.delim("metadata/consensus_taxonomy.txt", sep="")
-fungi_taxonomy <- taxonomy[(taxonomy$Kingdom=="Fungi"), ]
-
-bacteria_taxonomy <- read.table(file = 'metadata/taxonomic_assignments_esv.tsv', sep = '\t', header = TRUE)
-bacteria_taxonomy <- bacteria_taxonomy[(bacteria_taxonomy$Kingdom=="Bacteria"),]
-
-#check that data imported properly
-View(fungi_taxonomy)
-View(bacteria_taxonomy)
-
-#create data frame to match results with OTU IDs
-f_res.df <- as.data.frame(f_res)
-f_res.df$OTU_ID <- rownames(f_res.df)
-b_res.df <- as.data.frame(b_res)
-b_res.df$OTU_ID <- rownames(b_res.df)
-
-#check dataframe
-head(f_res.df)
-head(b_res.df)
-
-#combine results with OTU IDs
-f_res.df.tax <- merge(f_res.df, fungi_taxonomy, by="OTU_ID")
-b_res.df.tax <- merge(b_res.df, bacteria_taxonomy, by="OTU_ID")
-
-#create fungi volcano plot of significant classes using ggplot
-#create top significant classes from fungi res data
-f_significant_classes <- c("Agaricomycetes","Dothideomycetes","Mortierellomycetes","Sordariomycetes","Tremellomycetes")
-
-#subset significant classes from merged data frames
-f_res.df.tax.significant <- f_res.df.tax %>%
-  subset(Class %in% f_significant_classes)
-
-#drop unused levels from factors
-f_res.df.tax.significant$Class <- droplevels(factor(f_res.df.tax.significant$Class))
-
-#check
-#summary(f_res.df.tax.significant$Class)
-
-#ggplot with cut off lines at p-value of .05 and log2 FC using viridis color scheme
-ggplot(data=f_res.df.tax.significant) + 
-    geom_point(aes(x = f_res.df.tax.significant$log2FoldChange, y = -log10(f_res.df.tax.significant$pvalue)), color = ifelse(-log10(f_res.df.tax.significant$pvalue) < -log10(0.05),"#39568CFF","#55C667FF"), alpha=0.5) +
-    geom_hline(yintercept = -log10(0.05), color="#39568CFF") +
-    geom_vline(xintercept = 2, color="#39568CFF") +
-    geom_vline(xintercept = -2, color="#39568CFF") +
-    labs(x="Log2(FoldChange)", y="-Log10(Pvalue)", color="Class") +
-    theme_classic() + ggtitle("Differentially Abundant Fungal ESV's by Class") +
-    facet_wrap(~Class)
-  
-#create bacteria volcano plot of significant classes using ggplot
-#create top significant classes from bacteria res data
-b_significant_classes <- c("Acidimicrobiia", "Anaerolineae","Blastocatellia","Chloroflexia", "Gemmatimondadetes","Latescibacteria_cl","NC10", "Oxyphotobacteria","Phycisphaerae","Planctomycetacia")
-
-#subset significant classes from merged data frames
-b_res.df.tax.significant <- b_res.df.tax %>%
-  subset(Class %in% b_significant_classes)
-
-#drop unused levels from factors
-b_res.df.tax.significant$Class <- droplevels(factor(b_res.df.tax.significant$Class))
-
-#check
-#summary(b_res.df.tax.significant$Class)
-
-#ggplot with cut off lines at p-value of .05 and log2 FC using viridis color scheme
-ggplot(data=b_res.df.tax.significant) + 
-    geom_point(aes(x = b_res.df.tax.significant$log2FoldChange, y = -log10(b_res.df.tax.significant$pvalue)), color = ifelse(-log10(b_res.df.tax.significant$pvalue) < -log10(0.05),"#39568CFF","#55C667FF"), alpha=0.5) +
-    geom_hline(yintercept = -log10(0.05), color="#39568CFF") +
-    geom_vline(xintercept = 2, color="#39568CFF") +
-    geom_vline(xintercept = -2, color="#39568CFF") +
-    labs(x="Log2(FoldChange)", y="-Log10(Pvalue)", color="Class") +
-    theme_classic() + ggtitle("Differentially Abundant Bacterial ESV's by Class") +
-    facet_wrap(~Class)
-
-#Export plots
-tiff(file="figures/VP.bacteria.classFacet.tiff",width=2100,height=1890,res=300)
-plot(ggplot(data=b_res.df.tax.significant) + 
-    geom_point(aes(x = b_res.df.tax.significant$log2FoldChange, y = -log10(b_res.df.tax.significant$pvalue)), color = ifelse(-log10(b_res.df.tax.significant$pvalue) < -log10(0.05),"#39568CFF","#55C667FF"), alpha=0.5) +
-    geom_hline(yintercept = -log10(0.05), color="#39568CFF") +
-    geom_vline(xintercept = 2, color="#39568CFF") +
-    geom_vline(xintercept = -2, color="#39568CFF") +
-    labs(x="Log2(FoldChange)", y="-Log10(Pvalue)", color="Class") +
-    theme_classic() + ggtitle("Differentially Abundant Bacterial ESV's by Class") +
-    facet_wrap(~Class))
+##Save Heatmap as tiff file
+tiff("figures/16s_class_heatmap_PSnorm.tiff", units="in", width=12, height=12, res=300) ## Change "ITS_order_heatmap.tiff" to whatever title for the file you choose
+plot(d2)
 dev.off()
 
-tiff(file="figures/VP.fungi.classFacet.tiff",width=2100,height=1890,res=300)
-plot(ggplot(data=f_res.df.tax.significant) + 
-    geom_point(aes(x = f_res.df.tax.significant$log2FoldChange, y = -log10(f_res.df.tax.significant$pvalue)), color = ifelse(-log10(f_res.df.tax.significant$pvalue) < -log10(0.05),"#39568CFF","#55C667FF"), alpha=0.5) +
-    geom_hline(yintercept = -log10(0.05), color="#39568CFF") +
-    geom_vline(xintercept = 2, color="#39568CFF") +
-    geom_vline(xintercept = -2, color="#39568CFF") +
-    labs(x="Log2(FoldChange)", y="-Log10(Pvalue)", color="Class") +
-    theme_classic() + ggtitle("Differentially Abundant Fungal ESV's by Class") +
-    facet_wrap(~Class))
+####################
+
+#Plot fungal heatmap clustering by NMDS and Bray curtis distance, labeling sample type and supressing Taxon labels
+p1 <- plot_heatmap(funclass, "NMDS", "bray", sample.label = "SampleType", sample.order= "FieldSite", taxa.label="Class", low = "#FDE725FF", high = "#29AF7FFF", na.value= "white")
+#Organize by field sites and grouped by sample type
+q1 <- p1+ facet_grid(~SampleType, scales= "free_x", switch = "x")
+##Plot Heatmap with tick marks and FieldSite labels removed
+q2 <- q1 + theme(
+  axis.text.x = element_blank(),
+  axis.ticks = element_blank()
+  ) 
+plot(q2)
+
+##Save Heatmap as tiff file
+tiff("figures/ITS_class_heatmap.tiff", units="in", width=12, height=12, res=300) ## Change "ITS_order_heatmap.tiff" to whatever title for the file you choose
+plot(q2)
 dev.off()
 
-#Export data
-write.table(b_res.df.tax.significant, file="output/bacteria_parametricDESeq_significant.tsv", sep="\t",eol="\n")
-write.table(f_res.df.tax.significant, file="output/fungi_parametricDESeq_significant.tsv", sep="\t",eol="\n")
 ```
 
