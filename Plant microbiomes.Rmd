@@ -1,32 +1,41 @@
 ---
-title: "Waimea plant microbiomes"
-author: "C Wall and BOT662"
-date: "8/26/2019"
-output: html_document
+title: "Plant-part and environmental gradients shape plant microbiomes"
+author: "C Wall, J Bernard, and UH Mānoa BOT662"
+date: "12/3/2019"
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+editor_options: 
+  chunk_output_type: inline
 ---
-```{r, setup}
-if (!require('knitr')) install.packages('knitr'); library('knitr')
-knitr::opts_chunk$set(warning=FALSE, message=FALSE)
-```
+## Overview  
+Plant part and environmental context shape symbiotic microbial compositions, yet the interaction of these two variables are seldom considered. We analyzed epiphytic microbes from nine *Hibiscus tiliaceus* (Hawaiian: *hau*) trees across a steep environmental gradient within a single Hawaiian watershed in Waimea Valley on the north shore of O‘ahu, Hawai‘i. At each location we sampled *nine microhabitats*: leaves, petioles, axils, stems, roots, and litter from the plant, as well as surrounding air and soil.  The composition of microbial communities is driven primarily by microhabitat (i.e., above vs. below ground communities), this variable predicted more than twice the compositional variance in bacteria compared to fungi. Fungal community compositions, in contrast, were more responsive to gradient dynamics than bacteria, and there were differences between spatial dynamics of fungal communities associated with different microhabitats that correlate with distribution patterns and range size. Within plants, microbes were compositionally nested with aboveground communities containing a subset of diversity found belowground. Our findings suggest potential differences in the underlying mechanisms shaping communities of fungi and bacteria associated with plants, and indicate an interaction between assembly mechanisms working simultaneously on different spatial scales.  
 
-```{r, SiteMap_Script_AustinGreene. fig.show="hide", results="hide"}
+```{r global options, results="hide"}
+if (!require('knitr')) install.packages('knitr'); library('knitr')
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.align='center')
+
+# Load in packages
+if (!require("pacman")) install.packages("pacman"); library(pacman) # for rapid install if not in library
+if(!requireNamespace("BiocManager", quietly = TRUE))
+	install.packages("BiocManager")	#Load packages from Bioconductor
+
+pacman::p_load('FedData', 'latticeExtra', 'scales', 'viridis', 'ggmap', 'phyloseq', 'raster', 'rgdal', 'RColorBrewer', 'ggplot2', 'vegan', 'ggplot2', 'phyloseq', 'bipartite', 'plotrix', 'viridis', 'lattice', 'fossil', 'plyr', 'devtools', 'ggpubr', 'gridExtra', 'cowplot')
+
+devtools::install_bitbucket("graumannlabtools/multipanelfigure")
+```
+  
+#### Site Map  
+The site where the study was conducted: Waimea Valley on the north shore of O‘ahu, Hawai‘i.
+```{r, SiteMap_Script_AustinGreene, results="hide"}
 # Code by Austin Greene
 # Edited by Chris Wall
 
 # Purpose: Generate a map of Waimea Valley, Oahu with elevation data, 
 # and site locations which are scaled the mean-annual precipitation 
-
-# Load in packages
-require('FedData')
-require('latticeExtra')
-require('scales')
-require('viridis')
-require('ggmap')
-require('phyloseq')
-require('raster')
-require('rgdal')
-require('RColorBrewer')
-require('ggplot2')
 
 # Load in physeq object
 physeq1=readRDS("data/physeq1.gz")
@@ -35,7 +44,6 @@ physeq1=readRDS("data/physeq1.gz")
 # Using Stamen maps which do not require a Google API key
 map3 <- get_map(location = c(left = -158.070631, bottom = 21.598356, right = -157.998464, top = 21.655101), zoom=13, source="stamen", maptype = c("terrain-background"))
 Waimea_map_3 <- ggmap(map3) # Turn into ggmap graphical object
-Waimea_map_3 # Check that it looks good 
 
 # Generating extents of map to pull elevation
 bb <- attr(map3, "bb") # Mapp attribute object, from which we extract map extents 
@@ -43,7 +51,7 @@ extentB <- polygon_from_extent(raster::extent(bb$ll.lon, bb$ur.lon, bb$ll.lat, b
                                proj4string = "+proj=longlat +ellps=GRS80 +datum=NAD83 +no_defs")
 
 # Confirm bounding box for our elevation data
-ggmap(map3) + geom_polygon(data=extentB, fill=NA, aes(x=long,y=lat), color="red", size=3)
+# ggmap(map3) + geom_polygon(data=extentB, fill=NA, aes(x=long,y=lat), color="red", size=3)
 
 # Download elevation data tiles
 elev_waimea <- get_ned(template = extentB, label = "ned_waimea", res="1", force.redo = F)
@@ -69,12 +77,8 @@ Waimea_map_6_sizescaled <- Waimea_map_3 + # Existing map
   theme_classic() # Classic minimalist theme
 
 Waimea_map_6_sizescaled # Print the plot
-
-# Save the plot as a tiff image with 300 dpi. 
-# Setting to 6x6 inches of the plot with the expectation that this is 2x larger than publication size 
-# per publication guidelines (expected print size 3x3 in)
-# ggsave("figures/Map6_SizeScaled.tiff", Waimea_map_6_sizescaled, height = 6, width = 6, units = "in", device = "tiff", dpi=300)
 ```
+
 <center>  
   
 ![**Figure 1. Site map with sampling locations**](figures/bot662_map_final.tif){ width=60%}
@@ -82,13 +86,13 @@ Waimea_map_6_sizescaled # Print the plot
 </center>  
 
 
-#### Mantel: fung, bact
-```{r, fungibacteria_mantel}
+#### Distance decay: Bacteria and fungi  
+Inspect the bacterial and fungal communities using rarified and square-root transformed counts un Bray-Curtis dissimilarity matrix. There is a significant correlation between the 2 communities, with each showing similar patterns of dissimilarity and similarity within individual samples.  
+  
+```{r, fungibacteria_mantel, results="hide", fig.dim=c(5,5)}
 # Code by Anthony
 # modifed by Chris Wall
 # To plot mantel correlation between fungi and Bacteria
-require(vegan)
-require(ggplot2)
 
 #read normalized Bacteria Phylloseq object
 PS_normal=readRDS("data/PS_normal.gz")
@@ -137,20 +141,13 @@ dev.off()
 
 ```
 
-#### Bacterial Abundance Occupancy
-```{r, Bacterial Abundance Occupancy}
+#### Bacterial and fungal abundance-occupancy  
+Generate abundance-occupancy graphs with bacteria and fungal data with site locations, which are scaled the mean-annual precipitation.  
+  
+```{r, Bacterial and Fungal Abundance Occupancy, results='hide'}
 # Code by Anthony
 # modified by Feresa Corazon, Chris Wall
 # Purpose: Generate abundance occupancy graphs with bacteria and fungal data and site locations which are scaled the mean-annual precipitation 
-
-# Load in packages
-require('phyloseq')
-require('bipartite')
-require("raster")
-library("ggplot2")
-library("plotrix")
-library("viridis")
-library("lattice")
 
 
 #Section 1A. Calling all data and values for bacteria
@@ -186,7 +183,7 @@ phyloseq_standardize_otu_abundance <- function(physeq, method="total", ...){
   return(physeq)
 }
 
-#How many habitats is each ESV found? Standardize to convert to presence absence
+#How many habitats (sites) is each ESV found? Standardize to convert to presence absence
 habitats=colSums(otu_table(phyloseq_standardize_otu_abundance(agg, method = "pa")))
 #habitats
 
@@ -239,13 +236,7 @@ habpersite=cbind(colSums(otu_table(phyloseq_standardize_otu_abundance(subset_sam
       colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s10"), method = "pa"))))
 is.na(habpersite) <- habpersite==0
 habpersite=rowMeans(habpersite, na.rm=TRUE)
-```
 
-#### Fungal Abundance Occupancy
-```{r} 
-# Code by Anthony
-# modified by Feresa Corazon, Chris Wall
-# Purpose: Generate abundance occupancy graphs with bacteria and fungal data and site locations which are scaled the mean-annual precipitation 
 
 
 #Section 1B. Calling all data and values as above, but for fungi
@@ -330,8 +321,10 @@ is.na(habpersiteF) <- habpersiteF==0
 habpersiteF=rowMeans(habpersiteF, na.rm=TRUE)
 ```
 
-##### Bac-Fung: Habitat VS ESV range
-```{r, plots for Habitat VS ESV range}
+#### Bac-Fung: Habitat VS ESV range  
+Now use the habitats (geographic sites corresponding to changes in elevation/precipitation) to determine the range span for the ESVs. 
+  
+```{r, plots for Habitat VS ESV range, results="hide", message=FALSE, fig.dim=c(5,8)}
 #Section 2. Making all plots 
 ######################################################
 ########## ALL PLOTS AND STATISTICAL TESTS ###########
@@ -356,7 +349,6 @@ rp[2] = substitute(expression(italic(p) == pval),
 
 ###### Plot Bacteria: # of Habitats vs. ESV Range (PLOT 1) ###### 
 plot(jitter(rangespan,20),jitter(habitats,3),col="#481567FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Number of Habitats ESV is Present", main="Bacteria: # of Habitats vs. ESV Range") + abline(lsfit(rangespan,habitats), col="black", lwd=3)
-ablineclip(lm(rangespan~habitats),lty = 1) #Add cut-off lines
 legend('topright', legend = rp, bty = 'n', cex=0.6)
 
 
@@ -373,7 +365,6 @@ rp[2] = substitute(expression(italic(p) == pval),
 		list(pval = format(pval, digits = 3)))[2]
 
 plot(jitter(rangespanF,20),jitter(habitatsF,3),col="#95D840FF", cex=.2, ylim=c(0,12), xlab="ESV range (M)", ylab="Number of Habitats ESV is Present", main="Fungi: # of Habitats vs. ESV Range") + abline(lsfit(rangespanF,habitatsF), col="black", lwd=3)
-ablineclip(lm(rangespanF~habitatsF), lty = 1) #Add cut-off lines
 legend('topright', legend = rp, bty = 'n', cex=0.6)
 
 
@@ -393,7 +384,6 @@ rp[2] = substitute(expression(italic(p) == pval),
 
 plot(jitter(rangespan,20),jitter(log(meanabund),3),col="#481567FF", cex=.2, ylim=c(0,12), xlab="ESV range (m)", ylab="Mean Abundance Per Sample (Where Present)", main="Bacteria: Mean Abundance vs. ESV Range")
 abline(lsfit(rangespan,log(meanabund)), col="black", lwd=3)
-ablineclip(lm(rangespan~meanabund), lty = 1) #Add cut-off lines
 legend('topright', legend = rp, bty = 'n', cex=0.6)
 
 ###### Plot Fungi: Mean abundance vs.  ESV Range (PLOT 4) ###### 
@@ -409,7 +399,6 @@ rp[2] = substitute(expression(italic(p) == pval),
 		list(pval = format(pval, digits = 3)))[2]
 
 plot(jitter(rangespanF,20),jitter(log(meanabundF),3),col="#95D840FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Mean Abundance Per Sample (Where Present)", main=" Fungi: Mean Abundance vs. ESV Range")+ abline(lsfit(rangespanF,log(meanabundF)), col="black", lwd=3)
-ablineclip(lm(rangespanF~meanabundF), lty = 1) #Add cut-off lines
 legend('topright', legend = rp, bty = 'n', cex=0.6)
 
 ###### Third row: plotting MEAN HABITAT OCCURENCE VS ESV RANGE ###### 
@@ -450,7 +439,9 @@ dev.print(png, "figures/ESV.range.png", units="in", width=8, height=8, res=300)
 dev.off()
 ```
 
-#### Rangespan of phytobiome communities
+#### Rangespan of microbiome communities  
+  
+
 ```{r, rangespan}
 ##FIGURE 2. RANGESPAN OF PHYTOBIOME COMMUNITIES 
 #Set layout to combine boxplot and histogram
@@ -459,24 +450,24 @@ layout(mat = matrix(c(1,2,3,4),2,2),  height = c(1,8))
 
 #First plot: Bacterial rangespan
 #Set margin size for boxplot
-par(mar=c(0, 4, 1.1, 2.1)) 
+par(mar=c(0, 4, 2, 2.1)) 
 boxplot(rangespan, horizontal=TRUE, vertical=TRUE, xaxt="n" , col="#481567FF", main="Bacteria", frame=F) 
 
 #Set margin size for histogram
-par(mar=c(4, 4, 1.1, 2.1)) 
+par(mar=c(4, 4, 2.5, 2.1)) 
 hist(rangespan, breaks=40 , col="#481567FF", main="", ylab = "Frequency", xlab="ESV Range (m)", ylim=c(0,5000), xlim=c(0,6000))
 
 #Second Plot: Fungal rangespan
 #Set margin size for boxplot
-par(mar=c(0, 4, 1.1, 2.1))
+par(mar=c(0, 4, 2, 2.1))
 boxplot(rangespanF, horizontal=TRUE , xaxt="n" , col="#95D840FF", main="Fungi", frame=F)
 
 #Set margin size for histogram
-par(mar=c(4, 4, 1.1, 2.1))
+par(mar=c(4, 4, 2.5, 2.1))
 hist(rangespanF, breaks=40 , col="#95D840FF", main="", ylab = "Frequency", xlab="ESV Range (m)", ylim=c(0,3500), xlim=c(0,6000))
 
 #Add title to figure!
-title(main = "Rangespan of Phytobiome Communities", outer = TRUE, line = -0.5)
+title(main = "Rangespan of Phytobiome Communities", outer = TRUE, line = -1)
 
 dev.print(png, "figures/community.range.png", units="in", width=6, height=6, res=300)
 dev.off()
@@ -487,8 +478,6 @@ dev.off()
 ```{r, nestedPlots}
 #Code by Anthony
 #To produce nestedness plots
-require(phyloseq)
-require(bipartite)
 
 #read in rarefied Bacteria data
 rarPhySeq=readRDS("data/rarPhySeq.gz")
@@ -542,13 +531,6 @@ dev.off()
 ## Mantel Tests and Slope Plots By Plant Part
 ## Chad Wilhite 04/25/19
 ## edited Chris Wall
-
-# Load required packages
-require(fossil)
-require(vegan)
-require(phyloseq)
-require(ggplot2)
-
 
 ####################################
 #### Mantel Tests by SampleType ####
@@ -901,11 +883,6 @@ dev.off()
 ### Permanova
 ```{r, PERMANOVA}
 
-#Load Libraries
-library("ggplot2")
-library("plyr")
-library("vegan")
-
 ##PERMANOVA Bacteria
 PS_normal = readRDS("data/PS_normal.gz")
 PS_normal=transform_sample_counts(PS_normal, function(x) x^0.5)
@@ -919,8 +896,8 @@ PS_normal = subset_taxa(PS_normal, c(
 
 
 #Use base boxplot functin to look at sequencing depth
-boxplot(sample_sums(PS_normal)~sample_data(PS_normal)$FieldSite)
-boxplot(sample_sums(PS_normal)~sample_data(PS_normal)$SampleType)
+#boxplot(sample_sums(PS_normal)~sample_data(PS_normal)$FieldSite)
+#boxplot(sample_sums(PS_normal)~sample_data(PS_normal)$SampleType)
 
 #Bacterial ALL
 Site <- as.factor(PS_normal@sam_data$FieldSite)
@@ -933,7 +910,7 @@ bact_all
 ##PERMANOVA Fungi
 FPS_normal = readRDS("data/fungal_PS_normal.gz")
 
-fun_ps = transform_sample_counts(FPS_normal, sqrt)
+fun_ps = transform_sample_counts(FPS_normal, function(x) x^0.5)
 site <- as.factor(FPS_normal@sam_data$FieldSite)
 SampleType <- FPS_normal@sam_data$SampleType
 fun_ps <- phyloseq::distance(fun_ps, method="bray") #Normalized bact data - phyloseq-class
@@ -946,19 +923,6 @@ fun_all
 ```{r, NMDS heatmap}
 #Code by Maria and Helen
 #For NMDS plots and heat maps by Sample Type
-
-require(ggplot2)
-require(fossil)
-require(phyloseq)
-require(vegan)
-require(RColorBrewer)
-require(plyr)
-require(devtools)
-require(ggpubr)
-require(gridExtra)
-require(cowplot)
-
-devtools::install_bitbucket("graumannlabtools/multipanelfigure")
 
 #read in normalized bacterial data
 PS_normal<-readRDS("data/PS_normal.gz")
@@ -1013,41 +977,30 @@ funhell.ord<-ordinate(fungal.hell, "NMDS", "bray")
 cbPalette1<- c("#F0E442","#D55E00","#E69F00","#009E73","#999999","#CC79A7","#000000","#56B4E9","#0072B2")
 
 #bacteria NMDS by sample type
-plot1<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", color="SampleType", title="Bacteria") +
+bac.NMDS<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", color="SampleType", title="Bacteria") +
   theme(legend.position="none") +
   scale_fill_manual(values=cbPalette1) +  
   scale_colour_manual(values=cbPalette1)+
   stat_ellipse(geom="polygon",type="t", alpha=0.2, aes(fill=SampleType)) +
   theme(legend.position="none") + coord_equal(ratio=2) +
   theme_bw()
-plot1
+bac.NMDS
 
 dev.copy(png, "figures/NMDS_Bac.png", units="in", width=6, height=6, res=300)
 dev.off() 
 
 #fungal NMDS by sample type
-plot2<-plot_ordination(fungal.hell, funhell.ord,type="samples", color="SampleType", title="Fungi") +
+fung.NMDS<-plot_ordination(fungal.hell, funhell.ord,type="samples", color="SampleType", title="Fungi") +
   scale_fill_manual(values=cbPalette1) +  
   scale_colour_manual(values=cbPalette1)+
   stat_ellipse(geom="polygon", type="t", alpha=0.2, aes(fill=SampleType)) +
   theme(legend.position="none") +  coord_equal(ratio=2) +
   theme_bw()
-plot2
+fung.NMDS
 
 dev.copy(png, "figures/NMDS_Fungi.png", units="in", width=6, height=6, res=300)
 dev.off() 
 
-
-####MAKING A COMPOSITE FIGURE#########
-nmds<- ggarrange(plot1,plot2 + rremove("x.text"), common.legend = TRUE, legend="bottom", ncol=1, nrow=2)
-heatmaps<-ggarrange(q2+rremove("xlab"),fq2 + rremove("xlab"), common.legend = FALSE, legend="right", ncol=1, nrow=2)
-fullfig<-ggarrange(nmds, heatmaps + rremove("x.text"))
-ggdraw() +
-  draw_plot(nmds, x = 0, y = .5, width = .4, height = .4) +
-  draw_plot(heatmaps, x = 0, y = 0, width = .6, height = 0.6) +
-  draw_plot_label(label = c("A", "B", "C"), size = 15,
-                  x = c(0, 0.5, 0), y = c(1, 1, 0.5))
-plot(fullfig)         
 ```
 
 #### 16S and ITS heatmap
@@ -1055,17 +1008,6 @@ plot(fullfig)
 ####HEAT MAP DATA####
 
 ##Helen Sung, edited by Jared Bernard
-
-##Load packages (automatically install if needed)
-if(!requireNamespace("BiocManager", quietly = TRUE))
-	install.packages("BiocManager")	#Load packages from Bioconductor
-if(!require(phyloseq)){
-	BiocManager::install("phyloseq")
-	library(phyloseq)}
-if(!require("pacman")){
-	install.packages("pacman")
-	library(pacman)}
-p_load("plyr", "ggplot2", "mvabund", "viridis")
 
 ###Load phyloseq files###
 bacteria <- readRDS("data/PS_normal.gz") ## normalized phyloseq data
@@ -1134,6 +1076,5 @@ plot(q2)
 tiff("figures/ITS_class_heatmap.tiff", units="in", width=12, height=12, res=300) ## Change "ITS_order_heatmap.tiff" to whatever title for the file you choose
 plot(q2)
 dev.off()
-
 ```
 
