@@ -12,9 +12,11 @@ editor_options:
   chunk_output_type: inline
 ---
 ## Overview  
-Plant part and environmental context shape symbiotic microbial compositions, yet the interaction of these two variables are seldom considered. We analyzed epiphytic microbes from nine *Hibiscus tiliaceus* (Hawaiian: *hau*) trees across a steep environmental gradient within a single Hawaiian watershed in Waimea Valley on the north shore of O‘ahu, Hawai‘i. At each location we sampled *nine microhabitats*: leaves, petioles, axils, stems, roots, and litter from the plant, as well as surrounding air and soil.  The composition of microbial communities is driven primarily by microhabitat (i.e., above vs. below ground communities), this variable predicted more than twice the compositional variance in bacteria compared to fungi. Fungal community compositions, in contrast, were more responsive to gradient dynamics than bacteria, and there were differences between spatial dynamics of fungal communities associated with different microhabitats that correlate with distribution patterns and range size. Within plants, microbes were compositionally nested with aboveground communities containing a subset of diversity found belowground. Our findings suggest potential differences in the underlying mechanisms shaping communities of fungi and bacteria associated with plants, and indicate an interaction between assembly mechanisms working simultaneously on different spatial scales.  
+Plant part and environmental context shape symbiotic microbial compositions, yet the interaction of these two variables are seldom considered. We analyzed epiphytic microbes from nine *Hibiscus tiliaceus* (Hawaiian: *hau*) trees across a steep environmental gradient within a single Hawaiian watershed in Waimea Valley on the north shore of O‘ahu, Hawai‘i. At each location we sampled *nine microhabitats*: leaves, petioles, axils, stems, roots, and litter from the plant, as well as surrounding air and soil.   
 
-```{r global options, results="hide"}
+The composition of microbial communities is driven primarily by microhabitat (i.e., above vs. below ground communities), this variable predicted more than twice the compositional variance in bacteria compared to fungi. Fungal community compositions, in contrast, were more responsive to gradient dynamics than bacteria, and there were differences between spatial dynamics of fungal communities associated with different microhabitats that correlate with distribution patterns and range size. Within plants, microbes were compositionally nested with aboveground communities containing a subset of diversity found belowground. Our findings suggest potential differences in the underlying mechanisms shaping communities of fungi and bacteria associated with plants, and indicate an interaction between assembly mechanisms working simultaneously on different spatial scales.  
+
+```{r global options, results="hide", warning=FALSE, message=FALSE}
 if (!require('knitr')) install.packages('knitr'); library('knitr')
 knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.align='center')
 
@@ -30,7 +32,7 @@ devtools::install_bitbucket("graumannlabtools/multipanelfigure")
   
 #### Site Map  
 The site where the study was conducted: Waimea Valley on the north shore of O‘ahu, Hawai‘i.
-```{r, SiteMap_Script_AustinGreene, results="hide"}
+```{r, SiteMap_Script_AustinGreene, results="hide", fig.show='hide'}
 # Code by Austin Greene
 # Edited by Chris Wall
 
@@ -78,18 +80,20 @@ Waimea_map_6_sizescaled <- Waimea_map_3 + # Existing map
 
 Waimea_map_6_sizescaled # Print the plot
 ```
-
+  
+  
 <center>  
   
-![**Figure 1. Site map with sampling locations**](figures/bot662_map_final.tif){ width=60%}
+![**Figure 1. Site map with sampling locations**](figures/bot662_map_final.jpg){ width=60%}
 
 </center>  
-
-
+  
+ 
+  
 #### Distance decay: Bacteria and fungi  
 Inspect the bacterial and fungal communities using rarified and square-root transformed counts un Bray-Curtis dissimilarity matrix. There is a significant correlation between the 2 communities, with each showing similar patterns of dissimilarity and similarity within individual samples.  
   
-```{r, fungibacteria_mantel, results="hide", fig.dim=c(5,5)}
+```{r, fungibacteria_mantel, results="hide", fig.dim=c(6,4), fig.align="center", fig.cap="Figure. Bacterial and Fungal community mantel tests."}
 # Code by Anthony
 # modifed by Chris Wall
 # To plot mantel correlation between fungi and Bacteria
@@ -141,10 +145,14 @@ dev.off()
 
 ```
 
-#### Bacterial and fungal abundance-occupancy  
-Generate abundance-occupancy graphs with bacteria and fungal data with site locations, which are scaled the mean-annual precipitation.  
+#### Abundance-occupancy  
+Generate abundance-occupancy graphs with bacteria and fungal data with site locations (or habitats), which are scaled the mean-annual precipitation. Now generate plots for Bacteria and Fungi:  
+*1. The number of habitats vs. ESV range*  
+*2. Mean abundance vs ESV range*  
+*3. Mean habitat occurrence vs. ESV range*  
   
-```{r, Bacterial and Fungal Abundance Occupancy, results='hide'}
+Statistical tests in each figure show the significance of relationships using correlations tests and fitting line from *lsfit*.  
+```{r, plots for Habitat VS ESV range, results="hide", message=FALSE, fig.dim=c(6,5)}
 # Code by Anthony
 # modified by Feresa Corazon, Chris Wall
 # Purpose: Generate abundance occupancy graphs with bacteria and fungal data and site locations which are scaled the mean-annual precipitation 
@@ -319,13 +327,13 @@ habpersiteF=cbind(rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_sa
                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s10"), method = "pa"))))
 is.na(habpersiteF) <- habpersiteF==0
 habpersiteF=rowMeans(habpersiteF, na.rm=TRUE)
-```
 
-#### Bac-Fung: Habitat VS ESV range  
-Now use the habitats (geographic sites corresponding to changes in elevation/precipitation) to determine the range span for the ESVs. 
+
+##################
+# Now use the habitats (geographic sites corresponding to changes in elevation/precipitation) to determine the range span for the ESVs. 
   
-```{r, plots for Habitat VS ESV range, results="hide", message=FALSE, fig.dim=c(5,8)}
-#Section 2. Making all plots 
+
+# Section 2. Making all plots 
 ######################################################
 ########## ALL PLOTS AND STATISTICAL TESTS ###########
 ######################################################
@@ -415,8 +423,7 @@ rp[1] = substitute(expression(italic(R)^2 == r2),
 rp[2] = substitute(expression(italic(p) == pval), 
 		list(pval = format(pval, digits = 3)))[2]
 
-plot(jitter(rangespan,20),jitter(habpersite,3),col="#481567FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Mean Habitat Occurence (Per Site)", main="Bacteria: Mean Habitat Occurence vs. ESV Range") + abline(lsfit(rangespan,log(meanabund)), col="black", lwd=3) 
-ablineclip(lm(rangespan~habpersite), lty = 1) #Add cut-off lines
+plot(jitter(rangespan,20),jitter(habpersite,3),col="#481567FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Mean Habitat Occurence (Per Site)", main="Bacteria: Mean Habitat Occurence vs. ESV Range") + abline(lsfit(rangespan,log(meanabund)), col="black", lwd=3)
 legend('topright', legend = rp, bty = 'n', cex=0.6)
 
 ###### Plot Fungi: Mean Habitat Occurence vs. ESV Range (PLOT 6) ###### 
@@ -432,7 +439,6 @@ rp[2] = substitute(expression(italic(p) == pval),
 		list(pval = format(pval, digits = 3)))[2]
 
 plot(jitter(rangespanF,20),jitter(habpersiteF,3),col="#95D840FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Mean Habitat Occurence (Per Site)", main="Fungi: Mean Habitat Occurence vs. ESV Range") + abline(lsfit(rangespanF,log(meanabundF)), col="black", lwd=3)
-ablineclip(lm(rangespanF~habpersiteF), lty = 1) #Add cut-off lines
 legend('topright', legend = rp, bty = 'n', cex=0.6)
 
 dev.print(png, "figures/ESV.range.png", units="in", width=8, height=8, res=300)
@@ -440,42 +446,31 @@ dev.off()
 ```
 
 #### Rangespan of microbiome communities  
-  
-
-```{r, rangespan}
+Now create a plot for rangespan--the range in meters for each ESV--and the frequency of phytobiomes for bacteria and fungi.  
+```{r, rangespan, results="hide", fig.dim=c(6,4), results='hide'}
 ##FIGURE 2. RANGESPAN OF PHYTOBIOME COMMUNITIES 
 #Set layout to combine boxplot and histogram
 #Next plots will be created next to each other 
-layout(mat = matrix(c(1,2,3,4),2,2),  height = c(1,8))
+par(mfrow=c(1,2), mar=c(8,1,4,1))
 
 #First plot: Bacterial rangespan
 #Set margin size for boxplot
-par(mar=c(0, 4, 2, 2.1)) 
-boxplot(rangespan, horizontal=TRUE, vertical=TRUE, xaxt="n" , col="#481567FF", main="Bacteria", frame=F) 
-
-#Set margin size for histogram
-par(mar=c(4, 4, 2.5, 2.1)) 
-hist(rangespan, breaks=40 , col="#481567FF", main="", ylab = "Frequency", xlab="ESV Range (m)", ylim=c(0,5000), xlim=c(0,6000))
-
+boxplot(rangespan, horizontal=TRUE, vertical=TRUE, col="#481567FF", main="Bacteria", frame=F, cex.main=0.8, xlab="ESV range (m)", cex.axis=0.8) 
 #Second Plot: Fungal rangespan
 #Set margin size for boxplot
-par(mar=c(0, 4, 2, 2.1))
-boxplot(rangespanF, horizontal=TRUE , xaxt="n" , col="#95D840FF", main="Fungi", frame=F)
-
-#Set margin size for histogram
-par(mar=c(4, 4, 2.5, 2.1))
-hist(rangespanF, breaks=40 , col="#95D840FF", main="", ylab = "Frequency", xlab="ESV Range (m)", ylim=c(0,3500), xlim=c(0,6000))
+boxplot(rangespanF, horizontal=TRUE  , col="#95D840FF", main="Fungi", frame=F, cex.main=0.8, xlab="ESV range (m)", cex.axis=0.8)
 
 #Add title to figure!
-title(main = "Rangespan of Phytobiome Communities", outer = TRUE, line = -1)
+title(main = "Rangespan of Phytobiome Communities", outer = TRUE, line = -1, cex.main=1)
 
-dev.print(png, "figures/community.range.png", units="in", width=6, height=6, res=300)
+dev.print(png, "figures/community.rangespan.png", units="in", width=6, height=6, res=300)
 dev.off()
-
 ```
+  
+#### Nestedness plots  
+What is the nestedness for each community within the microhabitats of plant-parts and do they relate to each other among habitats (the sites of collection)?  
 
-#### Nestedness plots
-```{r, nestedPlots}
+```{r, nestedPlots, result="hide", fig.dim=c(5,7)}
 #Code by Anthony
 #To produce nestedness plots
 
@@ -507,27 +502,26 @@ funaggtab=as.data.frame(otu_table(funagg))
 #calculate nested temp
 funnested=nestedtemp(funaggtab)
 
-#create EPS file
-setEPS()
-#using a postscript device
-postscript("figures/nestedplots.eps")
 #make a two row composite figure, reguce spacing between inner and outer margins
 par(mfrow=c(2,1), mai=c(.1,1.,1,1), oma=c(.1,1,.1,1))
+#plot the Bacteria nested figure, suppress taxon names
+plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "purple"), lwd=3, main="Bacteria Nested Plot")
+#add stats are margin text
+mtext("Nested Temp=39.8, P=0.001")
 #plot the fungal nested figure, suppress taxon names
 plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "green"), lwd=3, main="Fungi Nested Plot")
 #add stats as margin text
 mtext("Nested Temp=42.5, P=0.001")
 
-#plot the Bacteria nested figure, suppress taxon names
-plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "purple"), lwd=3, main="Bacteria Nested Plot")
-#add stats are margin text
-mtext("Nested Temp=39.8, P=0.001")
+dev.print(png, "figures/nestedplots.png", units="in", width=6, height=6, res=300)
 dev.off()
 
 ```
 
-#### Mantel Tests and Slope Plot
-```{r}
+#### Mantel Tests
+Tests here show the relationships between plant parts (or plant organs) and bacterial communities fungal communities across geographic distance.  The **exported table** uses Hellinger square-root trasnformed abundance data in Mantel tests with p-values and Bonferroni corrected p-values.
+
+```{r, mantel tests}
 ## Mantel Tests and Slope Plots By Plant Part
 ## Chad Wilhite 04/25/19
 ## edited Chris Wall
@@ -549,9 +543,8 @@ PS_normal<- subset_taxa(PS_normal, c(Kingdom != "unknown", Kingdom != "Eukaryota
 PS_normal.hell = transform_sample_counts(PS_normal, function(x) x^0.5)
 
 # View SampleType names
-unique(get_variable(PS_normal.hell, sample_variables(PS_normal.hell)[18]))
-#
-##
+# unique(get_variable(PS_normal.hell, sample_variables(PS_normal.hell)[18]))
+
 ### Subset out bacterial data by SampleType
 
 # Subset bacterial data by plant part - the hard way... xD
@@ -564,8 +557,7 @@ litt_otu = subset_samples(PS_normal.hell, SampleType=="Litter")
 axil_otu = subset_samples(PS_normal.hell, SampleType=="Axil")
 peti_otu = subset_samples(PS_normal.hell, SampleType=="Petiole")
 
-#
-##
+
 ### Generate Dissimilarity Matrices for bacterial OTU data
 
 # Generate a dissimilarity matrix for grouped and individual plant part bacterial OTU data 
@@ -581,8 +573,7 @@ litt_otu.dist = phyloseq::distance(litt_otu, "bray")
 axil_otu.dist = phyloseq::distance(axil_otu, "bray") 
 peti_otu.dist = phyloseq::distance(peti_otu, "bray")
 
-#
-##
+
 ### Create correctly ordered sized geographic distance dissimilarity matrix
 
 #Gather bacterial spatial data from the phyloseq object
@@ -620,16 +611,6 @@ axil_bacteria_mantel = mantel(log(axil.geodist+1),log(axil_otu.dist), permutatio
 peti_bacteria_mantel = mantel(log(peti.geodist+1),log(peti_otu.dist), permutations= 999)
 
 
-#Call the bacterial results
-all_bacteria_mantel
-stem_bacteria_mantel
-root_bacteria_mantel
-air_bacteria_mantel
-leaf_bacteria_mantel
-soil_bacteria_mantel
-litt_bacteria_mantel
-axil_bacteria_mantel
-peti_bacteria_mantel
 
 #############################################
 ################ Fungal #####################
@@ -699,30 +680,19 @@ flitt_mantel = mantel(log(flitt.geodist+1),log(flitt_otu.dist), permutations= 99
 faxil_mantel = mantel(log(faxil.geodist+1),log(faxil_otu.dist), permutations= 999)
 fpeti_mantel = mantel(log(fpeti.geodist+1),log(fpeti_otu.dist), permutations= 999)
 
-#call the fungal results
-fall_mantel
-fstem_mantel
-froot_mantel
-fair_mantel
-fleaf_mantel
-fsoil_mantel
-flitt_mantel
-faxil_mantel
-fpeti_mantel
-
 
 ###################################################
 # Save Mantel Correlation Statistics and P Values #
 ###################################################
 
 #Call plant part results
-mant_cor = c(stem_bacteria_mantel$statistic, root_bacteria_mantel$statistic, 
+mant_cor = as.data.frame(c(stem_bacteria_mantel$statistic, root_bacteria_mantel$statistic, 
 	air_bacteria_mantel$statistic, leaf_bacteria_mantel$statistic, 
 	soil_bacteria_mantel$statistic, litt_bacteria_mantel$statistic, 
 	axil_bacteria_mantel$statistic, peti_bacteria_mantel$statistic, 
 	fstem_mantel$statistic, froot_mantel$statistic, fair_mantel$statistic, 
 	fleaf_mantel$statistic, fsoil_mantel$statistic, flitt_mantel$statistic, 
-	faxil_mantel$statistic, fpeti_mantel$statistic)
+	faxil_mantel$statistic, fpeti_mantel$statistic))
 
 #Call plant part p-values
 p_val = c(stem_bacteria_mantel$signif, root_bacteria_mantel$signif, 
@@ -740,16 +710,16 @@ results = data.frame( c( rep('Bacterial',8), rep('Fungal',8) ),
 	)
 
 #Name the columns intelligible names
-colnames(results) = c('type', 'Part', 'mant_cor', 'p_val')
+colnames(results) = c('Type', 'Part', 'Mant_cor', 'p_val')
 
 #Adjust p-values for repeated tests on the within plant part groups for bacteria
-bact.cor.p = p.adjust(results[results$type == 'Bacterial',4], method = 'bonferroni')
-bact.cor.p = data.frame(cor.p = bact.cor.p, type = rep('Bacterial',8), 
+bact.cor.p = p.adjust(results[results$Type == 'Bacterial',4], method = 'bonferroni')
+bact.cor.p = data.frame(cor.p = bact.cor.p, Type = rep('Bacterial',8), 
 	Part = as.character(unique(results$Part)) )
 
 #Adjust p-values for repeated tests on the within plant part groups for fungi
-fung.cor.p = p.adjust(results[results$type == 'Fungal',4], method = 'bonferroni')
-fung.cor.p = data.frame(cor.p = fung.cor.p, type = rep('Fungal',8), 
+fung.cor.p = p.adjust(results[results$Type == 'Fungal',4], method = 'bonferroni')
+fung.cor.p = data.frame(cor.p = fung.cor.p, Type = rep('Fungal',8), 
 	Part = as.character(unique(results$Part)) )
 
 #Join corrected p-values to for fungus and bacteria together
@@ -761,126 +731,19 @@ results = merge(results, cor.p)
 
 
 #Add overall test (all parts together) to data frame
-results2 = rbind( results, data.frame( type = c('Bacterial', 'Fungal'), Part = rep('All',2),
-	mant_cor = c(all_bacteria_mantel$statistic, fall_mantel$statistic), 
+results2 = rbind(results, data.frame(Type = c('Bacterial', 'Fungal'), Part = rep('All',2),
+	Mant_cor = c(all_bacteria_mantel$statistic, fall_mantel$statistic), 
 	p_val = c(all_bacteria_mantel$signif, fall_mantel$signif),
 	cor.p = rep('NA', 2))
 	)
 
 #Save all result data as a csv
 write.csv(results2, file = 'output/Mantel_Plant_Part_Results_Hell_Bray.csv')
+knitr::kable(results2, digits = c(0, 0, 3, 3, 3, 3))
 
-
-####################################################
-################### Slopes plot ####################
-####################################################
-
-
-# The colorblind friendly palette with grey:
-cbPalette = c('#999999', '#E69F00', '#56B4E9', 
-	'#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7')
-
-###################
-#### Bacterial ####
-###################
-
-#Combine all plant part bacterial OTU dissimilarity matrices
-ball.otudist = c(stem_otu.dist, root_otu.dist, air_otu.dist,
-	leaf_otu.dist, soil_otu.dist, litt_otu.dist, axil_otu.dist, peti_otu.dist)
-
-
-#Combine all plant part bacterial geographic dissimilarity matrices
-ball.geodist = c(stem.geodist, root.geodist, air.geodist,
-	leaf.geodist, soil.geodist, litt.geodist, axil.geodist, peti.geodist)
-
-#Set up properly ordered names by plant part
-bplpt = c( rep('Stem', 36), rep('Root', 36), rep('Air', 36), rep('Leaf', 36),
-	 rep('Soil', 36), rep('Litter', 36), rep('Axil', 36), rep('Petiole', 36) ) 
-
-
-#Combine the OTU and geographic dissimilarity vectors with their plant part names
-bac.all.dist = data.frame(b.geo.dist = ball.geodist, b.otu.dist = ball.otudist, b.pl.part = bplpt)
-
-
-#Give each plant part our particular colorblind friendly color
-b.part.col = data.frame(cbPalette, levels(bac.all.dist$b.pl.part))
-colnames(b.part.col) = c('b.col', 'b.pl.part')
-b.part.col$b.col = as.character(b.part.col$b.col)
-
-#Merge assigned plant part colors in the main data frame
-bac.all.dist = merge(bac.all.dist, b.part.col)
-
-
-#Create and save a plot of slopes for each plant part!
-bac.slope.plot = ggplot(bac.all.dist, aes(x=b.geo.dist, y=b.otu.dist, color = b.pl.part)) +
-	scale_color_manual( values = unique(bac.all.dist$b.col), name = "Sample Type") +
-	geom_smooth(method = lm, se = FALSE) + geom_point() +
-	theme(axis.line = element_line(color = "black"), legend.background = element_rect(),
-		panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-		panel.background = element_blank(), legend.key=element_blank(),
-		legend.justification=c(1,0), legend.position=c(1,0)) +
-	scale_x_continuous(name = "Pairwise Geographic Dissimilarity", breaks = 0:5) + 
-	ylab("Pairwise Community Dissimilarity")
-
-#Show plot
-bac.slope.plot
-
-#Save plot
-ggsave(filename = "figures/Bacterial_Slopes_by_Plant_Part.eps", width = 10, height = 10)
-
-dev.off()
-
-
-################
-#### Fungal ####
-################
-
-#Combine all fungal plant part OTU dissimilarity matrices
-fall.otudist = c(fstem_otu.dist, froot_otu.dist, fair_otu.dist,
-	fleaf_otu.dist, fsoil_otu.dist, flitt_otu.dist, faxil_otu.dist, fpeti_otu.dist)
-
-
-#Combine all fungal plant part geographic dissimilarity matrices
-fall.geodist = c(fstem.geodist, froot.geodist, fair.geodist,
-	fleaf.geodist, fsoil.geodist, flitt.geodist, faxil.geodist, fpeti.geodist)
-
-#Set up properly ordered names by plant part
-plpt = c( rep('Stem', 36), rep('Root', 36), rep('Air', 36), rep('Leaf', 36),
-	 rep('Soil', 36), rep('Litter', 36), rep('Axil', 36), rep('Petiole', 36) ) 
-
-
-#Combine the fungal OTU and geographic dissimilarity vectors with their plant part names
-fun.all.dist = data.frame(geo.dist = fall.geodist, otu.dist = fall.otudist, pl.part = plpt)
-
-
-#Give each plant part our particular colorblind friendly color
-part.col = data.frame(cbPalette, levels(fun.all.dist$pl.part))
-colnames(part.col) = c('col', 'pl.part')
-part.col$col = as.character(part.col$col)
-
-fun.all.dist = merge(fun.all.dist, part.col)
-
-
-#Make and save a plot of slopes for each fungal plant part!
-fun.slope.plot = ggplot(fun.all.dist, aes(x=geo.dist, y=otu.dist, color = pl.part)) +
-	scale_color_manual( values = unique(fun.all.dist$col), name = "Sample Type") +
-	geom_smooth(method = lm, se = FALSE) + geom_point() +
-	theme(axis.line = element_line(color = "black"), legend.background = element_rect(),
-		panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-		panel.background = element_blank(), legend.key=element_blank(),
-		legend.justification=c(1,0), legend.position=c(1,0)) +
-	 scale_x_continuous(name = "Pairwise Geographic Dissimilarity", breaks = 0:5) + 
-	ylab("Pairwise Community Dissimilarity")
-
-#Show plot
-fun.slope.plot
-
-#Save plot
-ggsave(filename = "figures/Fungal_Slopes_by_Plant_Part.eps", width = 10, height = 10)
-dev.off()
 ```
 
-### Permanova
+### PERMANOVA
 ```{r, PERMANOVA}
 
 ##PERMANOVA Bacteria
@@ -920,7 +783,9 @@ fun_all
 ```
 
 #### NMDS
-```{r, NMDS heatmap}
+Non-metric multidimensional scaling (NMDS) using Bray-Curtis ordination for Hellinger transformed bacterial and fungal communities with elipses and points for each plant-part.  
+  
+```{r, NMDS, results='hide'}
 #Code by Maria and Helen
 #For NMDS plots and heat maps by Sample Type
 
@@ -982,29 +847,34 @@ bac.NMDS<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", color="Sample
   scale_fill_manual(values=cbPalette1) +  
   scale_colour_manual(values=cbPalette1)+
   stat_ellipse(geom="polygon",type="t", alpha=0.2, aes(fill=SampleType)) +
-  theme(legend.position="none") + coord_equal(ratio=2) +
+  theme(legend.position="none") + coord_equal(ratio=2.15) +
   theme_bw()
-bac.NMDS
 
-dev.copy(png, "figures/NMDS_Bac.png", units="in", width=6, height=6, res=300)
-dev.off() 
 
 #fungal NMDS by sample type
 fung.NMDS<-plot_ordination(fungal.hell, funhell.ord,type="samples", color="SampleType", title="Fungi") +
   scale_fill_manual(values=cbPalette1) +  
   scale_colour_manual(values=cbPalette1)+
+  ylab("")+
   stat_ellipse(geom="polygon", type="t", alpha=0.2, aes(fill=SampleType)) +
   theme(legend.position="none") +  coord_equal(ratio=2) +
   theme_bw()
-fung.NMDS
 
-dev.copy(png, "figures/NMDS_Fungi.png", units="in", width=6, height=6, res=300)
-dev.off() 
+NMDS.legend <- get_legend(
+    # create some space to the left of the legend
+    fung.NMDS + theme(legend.box.margin = margin(0, 0, 0, 12)))
+
+NMDS.plots<- plot_grid(bac.NMDS + theme(legend.position = "none"), 
+                     fung.NMDS + theme(legend.position = "none"),
+                     ncol=2,nrow=1)
+
+plot_grid(NMDS.plots, NMDS.legend, rel_widths = c(3, 1)) # legend  1/3 size as first obj.
+dev.copy(pdf, "figures/NMDS.fig.pdf", width = 6, height = 4)
 
 ```
 
-#### 16S and ITS heatmap
-```{r, fungal heat map, results="hide"}
+#### Heatmaps
+```{r, bacteria and fungal heat map, results="hide"}
 ####HEAT MAP DATA####
 
 ##Helen Sung, edited by Jared Bernard
