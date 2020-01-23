@@ -147,306 +147,352 @@ dev.off()
 
 #### Abundance-occupancy  
 Generate abundance-occupancy graphs with bacteria and fungal data with site locations (or habitats), which are scaled the mean-annual precipitation. Now generate plots for Bacteria and Fungi:  
-*1. The number of habitats vs. ESV range*  
-*2. Mean abundance vs ESV range*  
-*3. Mean habitat occurrence vs. ESV range*  
+*1. The number of habitats vs. ASV range*  
+*2. Mean abundance vs ASV range*  
+*3. Mean habitat occurrence vs. ASV range*  
   
 Statistical tests in each figure show the significance of relationships using correlations tests and fitting line from *lsfit*.  
-```{r, plots for Habitat VS ESV range, results="hide", message=FALSE, fig.dim=c(6,5)}
-# Code by Anthony
-# modified by Feresa Corazon, Chris Wall
+```{r, plots for Habitat VS ASV range, results="hide", message=FALSE, fig.dim=c(6,5)}
+# Code by Anthony; modified by Jared Bernard and Feresa Corazon
 # Purpose: Generate abundance occupancy graphs with bacteria and fungal data and site locations which are scaled the mean-annual precipitation 
+
+# Function
+phyloseq_standardize_otu_abundance <- function(physeq, method="total", ...){  
+  trows <- phyloseq::taxa_are_rows(physeq)	## Check the orientation of the OTU table
+  if(trows == TRUE){ marg <- 2 } else { marg <- 1 }
+  comm <- as(object = phyloseq::otu_table(physeq),
+             Class = "matrix")	## Extact OTU table
+  comm_std <- vegan::decostand(comm, method,
+                               MARGIN = marg, ...)	## Standardize community table
+  phyloseq::otu_table(physeq) <- phyloseq::otu_table(comm_std,
+                                                     taxa_are_rows = trows)	## Replace old otu_table with the new one
+  return(physeq)
+}
 
 
 #Section 1A. Calling all data and values for bacteria
-###################################
+##################################
 ## Bacterial Abundance Occupancy ##
-###################################
+##################################
 
 rarPhySeq=readRDS("data/rarPhySeq.gz")
-rarPhySeq<- subset_taxa(rarPhySeq, c(Kingdom != "unknown", Kingdom != "Eukaryota"))
+rarPhySeq <- subset_taxa(rarPhySeq, Kingdom != "unknown")	#Remove unclassified kingdoms
+rarPhySeq <- subset_taxa(rarPhySeq, Kingdom != "Eukaryota")	#Remove eukaryotes
 
 #Calculate distance to shore
-sample_data(rarPhySeq)$Shore_dist=pointDistance(cbind(sample_data(rarPhySeq)$Long,sample_data(rarPhySeq)$Lat), c(-158.062848, 21.640741),lonlat=TRUE)
+sample_data(rarPhySeq)$Shore_dist = pointDistance(cbind
+	(sample_data(rarPhySeq)$Long,sample_data(rarPhySeq)$Lat),
+	c(-158.062848, 21.640741),lonlat = TRUE)
 
 # Merge by sample type
 agg=merge_samples(rarPhySeq, "SampleType")
 
-#Load in standarization code
-phyloseq_standardize_otu_abundance <- function(physeq, method="total", ...){
-  
-  ## Check the orientation of the OTU table
-  trows <- phyloseq::taxa_are_rows(physeq)
-  if(trows == TRUE){ marg <- 2 } else { marg <- 1 }
-  
-  ## Extact OTU table
-  comm <- as(object = phyloseq::otu_table(physeq), Class = "matrix")
-  
-  ## Standardize community table
-  comm_std <- vegan::decostand(comm, method, MARGIN = marg, ...)
-  
-  ## Replace old otu_table with the new one
-  phyloseq::otu_table(physeq) <- phyloseq::otu_table(comm_std, taxa_are_rows = trows)
-  
-  return(physeq)
-}
-
-#How many habitats (sites) is each ESV found? Standardize to convert to presence absence
-habitats=colSums(otu_table(phyloseq_standardize_otu_abundance(agg, method = "pa")))
-#habitats
+#How many habitats is each ASV found?
+#Standardize to convert to presence absence
+habitats = colSums(otu_table(phyloseq_standardize_otu_abundance(agg,
+	method = "pa")))
 
 #Merge by site location
-sites=merge_samples(rarPhySeq, "FieldSite")
+sites = merge_samples(rarPhySeq, "FieldSite")
 
 #Standardize to convert to presence absence and calculate site total
-site=colSums(otu_table(phyloseq_standardize_otu_abundance(sites, method = "pa")))
-#site
+site = colSums(otu_table(phyloseq_standardize_otu_abundance(sites,
+	method = "pa")))
 
 #Convert the otu table to presence absence in order to calculate range size
-binarysite=phyloseq_standardize_otu_abundance(sites, method = "pa")
+binarysite = phyloseq_standardize_otu_abundance(sites, method = "pa")
 
-#Multiply each OTU by it's distance to shore
-range=otu_table(binarysite)*sample_data(binarysite)$Shore_dist
+#Multiply each ASV by its distance to shore
+range = otu_table(binarysite)*sample_data(binarysite)$Shore_dist
 
 #Convert 0 to NA
-is.na(range) <- range==0
+is.na(range) <- range == 0
 
 #Calculate min and max distance to shore
-rangespan=apply(range,2,range, na.rm=TRUE)
+rangespan = apply(range,2,range, na.rm=TRUE)
 
 #Subtract min distance from max distance
-rangespan=rangespan[2,]-rangespan[1,]
+rangespan = rangespan[2,]-rangespan[1,]
 
 #Do same thing but log transform range
-nozerorangespan=rangespan
-is.na(nozerorangespan) <- nozerorangespan==0
+nozerorangespan = rangespan
+is.na(nozerorangespan) <- nozerorangespan == 0
 
 #Calculate total abundance
-abund=colSums(otu_table(rarPhySeq))     
+abund = colSums(otu_table(rarPhySeq))     
 
-#Calculate how many samples an OTU is present
-occupancy=colSums(otu_table(phyloseq_standardize_otu_abundance(rarPhySeq, method = "pa")))
+#Calculate how many samples an ASV is present
+occupancy = colSums(otu_table(phyloseq_standardize_otu_abundance(rarPhySeq,
+	method = "pa")))
 
 #Calculate mean abundance per sample (where present)
-meanabund=otu_table(rarPhySeq)
-is.na(meanabund) <- meanabund==0
-meanabund=colMeans(meanabund, na.rm=TRUE)
+meanabund = otu_table(rarPhySeq)
+is.na(meanabund) <- meanabund == 0
+meanabund = colMeans(meanabund, na.rm = TRUE)
 
 #Calculate per site habitat diversity (where present)
-habpersite=cbind(colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s1"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s2"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s3"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s4"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s5"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s6"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s7"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s8"), method = "pa"))),
-      colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s10"), method = "pa"))))
-is.na(habpersite) <- habpersite==0
-habpersite=rowMeans(habpersite, na.rm=TRUE)
+habpersite = cbind(colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s1"), method = "pa"))),
+                 colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s2"), method = "pa"))),
+                 colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s3"), method = "pa"))),
+                 colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s4"), method = "pa"))),
+                 colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s5"), method = "pa"))),
+                 colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s6"), method = "pa"))),
+                 colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s7"), method = "pa"))),
+                 colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s8"), method = "pa"))),
+                 colSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeq, FieldSite=="s10"), method = "pa"))))
+is.na(habpersite) <- habpersite == 0
+habpersite = rowMeans(habpersite, na.rm = TRUE)
 
+##################################
+## Bacterial Abundance Occupancy at Genus Level ##
+##################################
 
-
-#Section 1B. Calling all data and values as above, but for fungi
-################################
-## Fungal Abundance Occupancy ##
-################################
-physeqF=readRDS("data/fungal_rarPhySeq.gz")
-rarPhySeqF=rarefy_even_depth(physeqF, sample.size = 2000)
-
-sample_data(rarPhySeqF)$Shore_dist=pointDistance(cbind(sample_data(rarPhySeqF)$Long,sample_data(rarPhySeqF)$Lat), c(-158.063625, 21.640741),lonlat=TRUE)
-aggF=merge_samples(rarPhySeqF, "SampleType")
-phyloseq_standardize_otu_abundance <- function(physeq, method="total", ...){
-  
-  ## Check the orientation of the OTU table
-  trows <- phyloseq::taxa_are_rows(physeq)
-  if(trows == TRUE){ marg <- 2 } else { marg <- 1 }
-  
-  ## Extact OTU table
-  comm <- as(object = phyloseq::otu_table(physeq), Class = "matrix")
-  
-  ## Standardize community table
-  comm_std <- vegan::decostand(comm, method, MARGIN = marg, ...)
-  
-  ## Replace old otu_table with the new one
-  phyloseq::otu_table(physeq) <- phyloseq::otu_table(comm_std, taxa_are_rows = trows)
-  
-  return(physeq)
-}
-
-#How many habitats is each ESV found? Standardize to convert to presence absence
-habitatsF=colSums(otu_table(phyloseq_standardize_otu_abundance(aggF, method = "pa")))
-#habitatsF
-
-#Merge by site location
-sitesF=merge_samples(rarPhySeqF, "FieldSite")
+genus_sites = tax_glom(sites, taxrank = "Genus")
 
 #Standardize to convert to presence absence and calculate site total
-siteF=colSums(otu_table(phyloseq_standardize_otu_abundance(sitesF, method = "pa")))
-#siteF
+genus_site = colSums(otu_table(phyloseq_standardize_otu_abundance(genus_sites,
+	method = "pa")))
 
-#Convert the otu table to presence absence in order to calculate range size
-binarysiteF=phyloseq_standardize_otu_abundance(sitesF, method = "pa")
+#Convert the ASV table to presence absence in order to calculate range size
+genus_binarysite = phyloseq_standardize_otu_abundance(genus_sites,
+	method = "pa")
 
-#Multiply each OTU by it's distance to shore
+#Multiply each ASV by its distance to shore
+genus_range = otu_table(genus_binarysite)*
+	sample_data(genus_binarysite)$Shore_dist
+
+#Convert 0 to NA
+is.na(genus_range) <- genus_range == 0
+
+#Calculate min and max distance to shore
+genus_rangespan = apply(genus_range,2,range, na.rm = TRUE)
+
+#Subtract min distance from max distance
+genus_rangespan = genus_rangespan[2,]-genus_rangespan[1,]
+
+#Section 1B. Calling all data and values for fungi
+###############################
+## Fungal Abundance Occupancy##
+###############################
+
+rarPhySeqF=readRDS("data/fungal_rarPhySeq.gz")
+
+sample_data(rarPhySeqF)$Shore_dist = pointDistance(cbind
+	(sample_data(rarPhySeqF)$Long,sample_data(rarPhySeqF)$Lat),
+	c(-158.063625, 21.640741), lonlat = TRUE)
+
+aggF = merge_samples(rarPhySeqF, "SampleType")
+
+#How many habitats is each ASV found?
+#Standardize to convert to presence absence
+habitatsF = colSums(otu_table(phyloseq_standardize_otu_abundance(aggF,
+	method = "pa")))
+
+#Merge by site location
+sitesF = merge_samples(rarPhySeqF, "FieldSite")
+
+#Standardize to convert to presence absence and calculate site total
+siteF = colSums(otu_table(phyloseq_standardize_otu_abundance(sitesF,
+	method = "pa")))
+
+#Convert the ASV table to presence absence in order to calculate range size
+binarysiteF = phyloseq_standardize_otu_abundance(sitesF, method = "pa")
+
+#Multiply each ASV by its distance to shore
 rangeF=otu_table(binarysiteF)*sample_data(binarysiteF)$Shore_dist
 
 #Convert 0 to NA
-is.na(rangeF) <- rangeF==0
+is.na(rangeF) <- rangeF == 0
 
 #Calculate min and max distance to shore
-rangespanF=apply(rangeF,2,range.default, na.rm=TRUE)
+rangespanF = apply(rangeF,2,range.default, na.rm = TRUE)
 
 #Subtract min distance from max distance
-rangespanF=rangespanF[2,]-rangespanF[1,]
+rangespanF = rangespanF[2,]-rangespanF[1,]
 
 #Do same thing but log transform range
-nozerorangespanF=rangespanF
-is.na(nozerorangespanF) <- nozerorangespanF==0
+nozerorangespanF = rangespanF
+is.na(nozerorangespanF) <- nozerorangespanF == 0
 
 #Calculate total abundance
-abundF=colSums(otu_table(rarPhySeqF)) 
+abundF = colSums(otu_table(rarPhySeqF)) 
 
-#Calculate how many samples an OTU is present
-occupancyF=colSums(otu_table(phyloseq_standardize_otu_abundance(rarPhySeqF, method = "pa")))
+#Calculate how many samples an ASV is present
+occupancyF = colSums(otu_table(phyloseq_standardize_otu_abundance(rarPhySeqF,
+	method = "pa")))
 
 #Calculate mean abundance per sample (where present)
-meanabundF=otu_table(rarPhySeqF)
-is.na(meanabundF) <- meanabundF==0
-meanabundF=rowMeans(meanabundF, na.rm=TRUE)
+meanabundF = otu_table(rarPhySeqF)
+is.na(meanabundF) <- meanabundF == 0
+meanabundF = rowMeans(meanabundF, na.rm = TRUE)
 
 #Calculate per site habitat diversity (where present)
-habpersiteF=cbind(rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s1"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s2"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s3"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s4"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s5"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s6"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s7"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s8"), method = "pa"))),
-                 rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s10"), method = "pa"))))
-is.na(habpersiteF) <- habpersiteF==0
-habpersiteF=rowMeans(habpersiteF, na.rm=TRUE)
+habpersiteF = cbind(rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s1"), method = "pa"))),
+                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s2"), method = "pa"))),
+                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s3"), method = "pa"))),
+                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s4"), method = "pa"))),
+                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s5"), method = "pa"))),
+                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s6"), method = "pa"))),
+                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s7"), method = "pa"))),
+                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s8"), method = "pa"))),
+                  rowSums(otu_table(phyloseq_standardize_otu_abundance(subset_samples(rarPhySeqF, FieldSite=="s10"), method = "pa"))))
+is.na(habpersiteF) <- habpersiteF == 0
+habpersiteF = rowMeans(habpersiteF, na.rm = TRUE)
 
+##################################
+## Fungal Abundance Occupancy at Genus Level##
+##################################
 
-##################
-# Now use the habitats (geographic sites corresponding to changes in elevation/precipitation) to determine the range span for the ESVs. 
-  
+genus_sitesF = tax_glom(sitesF, taxrank = "Genus")
 
-# Section 2. Making all plots 
+#Standardize to convert to presence absence and calculate site total
+genus_siteF = colSums(otu_table(phyloseq_standardize_otu_abundance(genus_sitesF,
+	method = "pa")))
+
+#Convert the ASV table to presence absence in order to calculate range size
+genus_binarysiteF = phyloseq_standardize_otu_abundance(genus_sitesF,
+	method = "pa")
+
+#Multiply each ASV by its distance to shore
+genus_rangeF = otu_table(genus_binarysiteF)*
+	sample_data(genus_binarysiteF)$Shore_dist
+
+#Convert 0 to NA
+is.na(genus_rangeF) <- genus_rangeF == 0
+
+#Calculate min and max distance to shore
+genus_rangespanF = apply(genus_rangeF,2,range, na.rm = TRUE)
+
+#Subtract min distance from max distance
+genus_rangespanF = genus_rangespanF[2,] - genus_rangespanF[1,]
+
+#Section 2. Making all plots 
 ######################################################
 ########## ALL PLOTS AND STATISTICAL TESTS ###########
 ######################################################
 
-# FIGURE 1. ESV RANGE RELATIONSHIPS
-# Create a 3 x 3 plotting matrix
-# The next  plots created will be plotted next to each other
-par(mfrow = c(3, 2))
+par(mfrow=c(3,2), mar=c(4,5,0,0.2))
 
-######  First row: plotting # OF HABITATS VS ESV RANGE
-cor<-cor.test(rangespan, habitats) #Calculate correlation
-r2<-cor$estimate^2
-pval=cor$p.value
+#####################
+#First plot: Bacterial rangespan (PLOT 1, row 1)
+#Combine Genus and ASV tables
+ranges <- data.frame(Genus=c(rep("Genus", times=length(genus_rangespan)), 
+                        rep("ASV", times=length(rangespan))), 
+                 combined_rangespan=c(genus_rangespan, rangespan))
 
-# make plot with R and p-value
-rp = vector('expression',2)
-rp[1] = substitute(expression(italic(R)^2 == r2), 
-		list(r2 = format(r2,dig=3)))[2]
-rp[2] = substitute(expression(italic(p) == pval), 
-		list(pval = format(pval, digits = 3)))[2]
+#Set margin size for boxplot
+# bactrange
+boxplot(combined_rangespan~Genus, horizontal = TRUE, xaxt="n", yaxt="n", medlwd=1.5, lwd=0.8,
+	vertical = TRUE, col = "gray48", frame = F, cex.lab = 0.6, ylab="Levels",
+	xlab="", cex.axis = 0.6, data = ranges)
+axis(side=1,labels=F, tck=-0.06)
+axis(side=2,labels=c("ASV", "Genus"), cex.axis = 0.6, at=seq(2), tck=-0.06)
 
-###### Plot Bacteria: # of Habitats vs. ESV Range (PLOT 1) ###### 
-plot(jitter(rangespan,20),jitter(habitats,3),col="#481567FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Number of Habitats ESV is Present", main="Bacteria: # of Habitats vs. ESV Range") + abline(lsfit(rangespan,habitats), col="black", lwd=3)
-legend('topright', legend = rp, bty = 'n', cex=0.6)
+#####################
+#Second Plot: Fungal rangespan (PLOT 2, row 1)
+rangesF <- data.frame(Genus=c(rep("Genus", times=length(genus_rangespanF)), 
+                             rep("ASV", times=length(rangespanF))), 
+                     combined_rangespanF=c(genus_rangespanF, rangespanF))
+
+#Set margin size for boxplot
+# fungrange
+boxplot(combined_rangespanF~Genus, horizontal = TRUE,  xaxt="n", yaxt="n", pch=21, cex=0.6, medlwd=1.5,
+	col = "gray84", frame = F, cex.axis=0.8, ylab="", xlab="", lwd=0.8, data = rangesF)
+axis(side=1,labels=F, tck=-0.06)
+axis(side=2,labels=F, at=seq(2), tck=-0.06)
+
+#compare ranges between bacteria and fungi genera
+t.test(genus_rangespan,genus_rangespanF)
+
+# Welch Two Sample t-test
+# 
+# data:  genus_rangespan and genus_rangespanF
+# t = 5.7294, df = 869.79, p-value = 1.389e-08
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   467.2236 954.1336
+# sample estimates:
+#   mean of x mean of y 
+# 3757.528  3046.850
+
+#compare ranges between bacteria and fungi ASVs
+t.test(rangespan, rangespanF)
+
+# Welch Two Sample t-test
+# 
+# data:  rangespan and rangespanF
+# t = 32.062, df = 13235, p-value < 2.2e-16
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   852.2800 963.2758
+# sample estimates:
+#   mean of x mean of y 
+# 2077.959  1170.181
+
+#####################
+##Plot Bacteria: # of Habitats vs. ASV Range (PLOT 3, row 2)
+# bact_habrange
+plot(jitter(rangespan,20),jitter(habitats,3), xaxt="n", yaxt="n", ylim=c(0,10), pch=16,
+	col="gray48", cex=0.2, xlab="", cex.lab=0.6,
+	ylab="Number of Habitats \nASV is Present")+
+	abline(lsfit(rangespan,habitats), col="black", lwd=1)
+axis(side=1,labels=F, tck=-0.06)
+axis(side=2, labels=T, tck=-0.06, cex.axis=0.6, at=seq(2,10, by=3))
+
+#Calculate correlation
+cor.test(rangespan, habitats)
+#text(temp, expression(paste( italic("R^2 = 0.262 
+#	p < 0.001"))))
+
+#####################
+#Plot Fungi: # of Habitats vs. ASV Range (PLOT 4, row 2)
+# fung_habrange
+plot(jitter(rangespanF,20),jitter(habitatsF,3), yaxt="n", xaxt="n", ylim=c(0,10), pch=16,
+	col="gray74", cex=0.2, xlab="",  cex.axis=0.6, ylab="",
+	abline(lsfit(rangespanF,habitatsF), col="black", lwd=1))
+	axis(side=1,labels=F, tck=-0.06)
+	axis(side=2,labels=F, tck=-0.06, at=seq(2,10, by=3))
+	
+
+#Calculate correlation
+cor.test(rangespanF, habitatsF)
+#text(temp, expression(paste( italic("R^2 = 0.451
+#	p < 0.001"))))
+
+#####################
+# Plot Bacteria: Mean Abundance vs. ASV Range (PLOT 5,  row 3)
+plot(jitter(rangespan,20),jitter(log(meanabund),3),col="gray48", cex=0.2, pch=16,
+     xaxt="n", yaxt="n", ylim=c(0,10),
+     cex.lab=0.6, xlab="ASV range (m)", ylab="Mean Abundance/Sample \n(Where Present)") + abline(lsfit(rangespan,log(meanabund)), col = "black", lwd = 1)
+axis(side=1,labels=T, tck=-0.06, cex.axis=0.6)
+axis(side=2,labels=T, tck=-0.06, cex.axis=0.6, at=seq(2,10, by=3))
+
+#Calculate correlation
+cor.test(rangespan, meanabund)
+#text(temp,expression(paste( italic("R^2 < 0.001
+#	p = 0.554"))))
+
+#####################
+# Plot Fungi: Mean abundance vs. ASV Range (PLOT 6, row 3)
+plot(jitter(rangespanF,20),jitter(log(meanabundF),3),col="gray74", cex=0.2, xaxt="n", ylim=c(0,10),
+     yaxt="n", cex.lab=0.6, xlab="ASV range (m)", ylab="", pch=16) + 
+  abline(lsfit(rangespanF,log(meanabundF)), col="black", lwd=1)
+axis(side=1,labels=T, tck=-0.06, cex.axis=0.6)
+axis(side=2,labels=F, tck=-0.06, at=seq(2,10, by=3))
 
 
-###### Plot Fungi: # of Habitats vs. ESV Range (PLOT 2) ###### 
-cor<-cor.test(rangespanF, habitatsF) #Calculate correlation
-r2<-cor$estimate^2
-pval=cor$p.value
-
-# make plot with R and p-value
-rp = vector('expression',2)
-rp[1] = substitute(expression(italic(R)^2 == r2), 
-		list(r2 = format(r2,dig=3)))[2]
-rp[2] = substitute(expression(italic(p) == pval), 
-		list(pval = format(pval, digits = 3)))[2]
-
-plot(jitter(rangespanF,20),jitter(habitatsF,3),col="#95D840FF", cex=.2, ylim=c(0,12), xlab="ESV range (M)", ylab="Number of Habitats ESV is Present", main="Fungi: # of Habitats vs. ESV Range") + abline(lsfit(rangespanF,habitatsF), col="black", lwd=3)
-legend('topright', legend = rp, bty = 'n', cex=0.6)
+#Calculate correlation
+cor.test(rangespanF, meanabundF)
+#text(temp,expression(paste( italic("R^2 = 0.012
+#	p < 0.001"))))
 
 
-######  Second row: plotting MEAN ABUNDANCE VS ESV RANGE
-
-######  Plot Bacteria: Mean Abundance vs. ESV Range (PLOT 3 ###### 
-cor<-cor.test(rangespan, meanabund) #Calculate correlation
-r2<-cor$estimate^2
-pval=cor$p.value
-
-# make plot with R and p-value
-rp = vector('expression',2)
-rp[1] = substitute(expression(italic(R)^2 == r2), 
-		list(r2 = format(r2,dig=3)))[2]
-rp[2] = substitute(expression(italic(p) == pval), 
-		list(pval = format(pval, digits = 3)))[2]
-
-plot(jitter(rangespan,20),jitter(log(meanabund),3),col="#481567FF", cex=.2, ylim=c(0,12), xlab="ESV range (m)", ylab="Mean Abundance Per Sample (Where Present)", main="Bacteria: Mean Abundance vs. ESV Range")
-abline(lsfit(rangespan,log(meanabund)), col="black", lwd=3)
-legend('topright', legend = rp, bty = 'n', cex=0.6)
-
-###### Plot Fungi: Mean abundance vs.  ESV Range (PLOT 4) ###### 
-cor<-cor.test(rangespanF, meanabundF) #Calculate correlation
-r2<-cor$estimate^2
-pval=cor$p.value
-
-# make plot with R and p-value
-rp = vector('expression',2)
-rp[1] = substitute(expression(italic(R)^2 == r2), 
-		list(r2 = format(r2,dig=3)))[2]
-rp[2] = substitute(expression(italic(p) == pval), 
-		list(pval = format(pval, digits = 3)))[2]
-
-plot(jitter(rangespanF,20),jitter(log(meanabundF),3),col="#95D840FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Mean Abundance Per Sample (Where Present)", main=" Fungi: Mean Abundance vs. ESV Range")+ abline(lsfit(rangespanF,log(meanabundF)), col="black", lwd=3)
-legend('topright', legend = rp, bty = 'n', cex=0.6)
-
-###### Third row: plotting MEAN HABITAT OCCURENCE VS ESV RANGE ###### 
-
-###### Plot Bacteria: Mean Habitat Occurence vs. ESV Range (PLOT 5) ###### 
-cor<-cor.test(rangespan, habpersite) #Calculate correlation
-r2<-cor$estimate^2
-pval=cor$p.value
-
-# make plot with R and p-value
-rp = vector('expression',2)
-rp[1] = substitute(expression(italic(R)^2 == r2), 
-		list(r2 = format(r2,dig=3)))[2]
-rp[2] = substitute(expression(italic(p) == pval), 
-		list(pval = format(pval, digits = 3)))[2]
-
-plot(jitter(rangespan,20),jitter(habpersite,3),col="#481567FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Mean Habitat Occurence (Per Site)", main="Bacteria: Mean Habitat Occurence vs. ESV Range") + abline(lsfit(rangespan,log(meanabund)), col="black", lwd=3)
-legend('topright', legend = rp, bty = 'n', cex=0.6)
-
-###### Plot Fungi: Mean Habitat Occurence vs. ESV Range (PLOT 6) ###### 
-cor<-cor.test(rangespanF, habpersiteF) #Calculate correlation
-r2<-cor$estimate^2
-pval=cor$p.value
-
-# make plot with R and p-value
-rp = vector('expression',2)
-rp[1] = substitute(expression(italic(R)^2 == r2), 
-		list(r2 = format(r2,dig=3)))[2]
-rp[2] = substitute(expression(italic(p) == pval), 
-		list(pval = format(pval, digits = 3)))[2]
-
-plot(jitter(rangespanF,20),jitter(habpersiteF,3),col="#95D840FF", ylim=c(0,12), cex=.2, xlab="ESV range (m)", ylab="Mean Habitat Occurence (Per Site)", main="Fungi: Mean Habitat Occurence vs. ESV Range") + abline(lsfit(rangespanF,log(meanabundF)), col="black", lwd=3)
-legend('topright', legend = rp, bty = 'n', cex=0.6)
-
-dev.print(png, "figures/ESV.range.png", units="in", width=8, height=8, res=300)
+dev.print(png, "figures/ASV.range.png", units="in", width=6, height=4, res=300)
 dev.off()
 ```
 
 #### Rangespan of microbiome communities  
-Now create a plot for rangespan--the range in meters for each ESV--and the frequency of phytobiomes for bacteria and fungi.  
+Now create a plot for rangespan--the range in meters for each ASV--and the frequency of phytobiomes for bacteria and fungi.  
 ```{r, rangespan, results="hide", fig.dim=c(6,4), results='hide'}
 ##FIGURE 2. RANGESPAN OF PHYTOBIOME COMMUNITIES 
 #Set layout to combine boxplot and histogram
@@ -455,10 +501,10 @@ par(mfrow=c(1,2), mar=c(8,1,4,1))
 
 #First plot: Bacterial rangespan
 #Set margin size for boxplot
-boxplot(rangespan, horizontal=TRUE, vertical=TRUE, col="#481567FF", main="Bacteria", frame=F, cex.main=0.8, xlab="ESV range (m)", cex.axis=0.8) 
+boxplot(rangespan, horizontal=TRUE, vertical=TRUE, col="#481567FF", main="Bacteria", frame=F, cex.main=0.8, xlab="ASV range (m)", cex.axis=0.8) 
 #Second Plot: Fungal rangespan
 #Set margin size for boxplot
-boxplot(rangespanF, horizontal=TRUE  , col="#95D840FF", main="Fungi", frame=F, cex.main=0.8, xlab="ESV range (m)", cex.axis=0.8)
+boxplot(rangespanF, horizontal=TRUE  , col="#95D840FF", main="Fungi", frame=F, cex.main=0.8, xlab="ASV range (m)", cex.axis=0.8)
 
 #Add title to figure!
 title(main = "Rangespan of Phytobiome Communities", outer = TRUE, line = -1, cex.main=1)
@@ -905,7 +951,7 @@ sample_data(fungi)$SampleType = factor(sample_data(fungi)$SampleType, levels = c
 # NOTE: Can put any physeq dataset (i.e. PS_normal, physeq1, rarPhySeq, phyobject.hell) into tax_glom(physeqobject, taxrank = "Rank you want to subset to") to subset
 # tax_glom() gloms things together at the specified rank and it will get rid of anything that's not classified at that level
 
-##Pool all ESVs by Class 
+##Pool all ASVs by Class 
 class_dat <- tax_glom(bacteria, taxrank="Class") ## subsetting for normalized data
 funclass <- tax_glom(fungi, taxrank="Class")
 
