@@ -146,10 +146,10 @@ dev.off()
 ```
 
 #### Abundance-occupancy  
-Generate abundance-occupancy graphs with bacteria and fungal data with site locations (or habitats), which are scaled the mean-annual precipitation. Now generate plots for Bacteria and Fungi:  
-*1. The number of habitats vs. ASV range*  
-*2. Mean abundance vs ASV range*  
-*3. Mean habitat occurrence vs. ASV range*  
+Generate abundance-occupancy graphs with bacteria and fungal data with site locations (habitats), which are scaled the mean-annual precipitation. Now generate plots for Bacteria and Fungi:  
+*1. Mean ASV range for ASVs or Genus levels*  
+*2. Number of Habitats ASV is Present in vs ASV range*  
+*3. Mean abundance per sample (when present) occurrence vs. ASV range*  
   
 Statistical tests in each figure show the significance of relationships using correlations tests and fitting line from *lsfit*.  
 ```{r, plots for Habitat VS ASV range, results="hide", message=FALSE, fig.dim=c(6,5)}
@@ -371,7 +371,7 @@ genus_rangespanF = genus_rangespanF[2,] - genus_rangespanF[1,]
 ########## ALL PLOTS AND STATISTICAL TESTS ###########
 ######################################################
 
-par(mfrow=c(3,2), mar=c(4,5,0,0.2))
+par(mfrow=c(3,2), mar=c(4,5,0.7,0.2))
 
 #####################
 #First plot: Bacterial rangespan (PLOT 1, row 1)
@@ -384,6 +384,7 @@ ranges <- data.frame(Genus=c(rep("Genus", times=length(genus_rangespan)),
 # bactrange
 boxplot(combined_rangespan~Genus, horizontal = TRUE, xaxt="n", yaxt="n", medlwd=1.5, lwd=0.8,
 	vertical = TRUE, col = "gray48", frame = F, cex.lab = 0.6, ylab="Levels",
+	main= "Bacteria", cex.main=0.8,
 	xlab="", cex.axis = 0.6, data = ranges)
 axis(side=1,labels=F, tck=-0.06)
 axis(side=2,labels=c("ASV", "Genus"), cex.axis = 0.6, at=seq(2), tck=-0.06)
@@ -396,7 +397,7 @@ rangesF <- data.frame(Genus=c(rep("Genus", times=length(genus_rangespanF)),
 
 #Set margin size for boxplot
 # fungrange
-boxplot(combined_rangespanF~Genus, horizontal = TRUE,  xaxt="n", yaxt="n", pch=21, cex=0.6, medlwd=1.5,
+boxplot(combined_rangespanF~Genus, horizontal = TRUE,  xaxt="n", yaxt="n", cex=0.4, medlwd=1.5, main="Fungi", cex.main=0.8, pch=16,
 	col = "gray84", frame = F, cex.axis=0.8, ylab="", xlab="", lwd=0.8, data = rangesF)
 axis(side=1,labels=F, tck=-0.06)
 axis(side=2,labels=F, at=seq(2), tck=-0.06)
@@ -463,7 +464,7 @@ cor.test(rangespanF, habitatsF)
 # Plot Bacteria: Mean Abundance vs. ASV Range (PLOT 5,  row 3)
 plot(jitter(rangespan,20),jitter(log(meanabund),3),col="gray48", cex=0.2, pch=16,
      xaxt="n", yaxt="n", ylim=c(0,10),
-     cex.lab=0.6, xlab="ASV range (m)", ylab="Mean Abundance/Sample \n(Where Present)") + abline(lsfit(rangespan,log(meanabund)), col = "black", lwd = 1)
+     cex.lab=0.6, xlab="ASV range (m)", ylab="Mean Abundance/Sample \n(Where Present)") +
 axis(side=1,labels=T, tck=-0.06, cex.axis=0.6)
 axis(side=2,labels=T, tck=-0.06, cex.axis=0.6, at=seq(2,10, by=3))
 
@@ -487,9 +488,66 @@ cor.test(rangespanF, meanabundF)
 #	p < 0.001"))))
 
 
-dev.print(png, "figures/ASV.range.png", units="in", width=6, height=4, res=300)
+dev.print(png, "figures/ASV.range.png", units="in", width=6, height=5, res=300)
 dev.off()
 ```
+
+Additional taxonomy summary for abundance-occupancy data, used in Supplementary Figures 4 and 5
+```{r, taxonomy, results="hide", message=FALSE, fig.dim=c(6,5)}
+
+### TaxonomySummary ####
+bacttax=tax_table(binarysite)
+bactaxrange=data.frame(bacttax,rangespan,habitats)
+#head(bactaxrange)
+
+bacphybymedrange <- with(bactaxrange, reorder(Phylum, rangespan, median))
+bacphybymedhab <- with(bactaxrange, reorder(Phylum, habitats, median))
+
+### Bacteria phyla plot
+par(mfrow=c(2,1), mar=c(4,10,1,1)+0.1)
+
+# Bacteria rangespan
+boxplot(bactaxrange$rangespan~bacphybymedrange, las=2, horizontal=TRUE, frame=F, cex.main=1,
+        main="Distribution of Bacteria Phyla", col="gray48", cex=0.4, medlwd=1.5,
+        xaxt="n", tck=-0.03, xlab="Range (m)", ylab="", cex.axis=0.6, cex.lab=0.8)
+axis(side=1, labels=T, seq(0,5500, by=1000), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
+
+
+# Bacteria habitats
+boxplot(bactaxrange$habitats~bacphybymedhab, las=2, horizontal=TRUE, frame=F, xaxt="n", tck=-0.03,
+        col="gray48", xlab="Habitats", cex.axis=0.6, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5)
+axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
+
+dev.copy(png, "figures/BactTax.range.hab.png", units="in", width=6, height=7, res=300)
+dev.off()
+
+
+######### Fungi 
+funtax=tax_table(binarysiteF)
+funtaxrange=data.frame(funtax,rangespanF,habitatsF)
+#head(funtaxrange)
+
+funphybymedrange <- with(funtaxrange, reorder(Class, rangespanF, median))
+funphybymedhab <- with(funtaxrange, reorder(Class, habitatsF, median))
+
+### Fungi class plot
+par(mfrow=c(2,1), mar=c(4,10,1,1)+0.1)
+
+# Fungi rangespan
+boxplot(funtaxrange$rangespanF~funphybymedrange,las=2, horizontal=TRUE, frame=F, cex.main=1,
+        main="Distribution of Fungal Classes", col="gray84", cex=0.4, medlwd=1.5,
+        xaxt="n", tck=-0.03, xlab="Range (m)", ylab="", cex.axis=0.6, cex.lab=0.8)
+axis(side=1, labels=T, seq(0,5500, by=1000), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
+
+# Fungi habitats
+boxplot(funtaxrange$habitatsF~funphybymedhab, las=2, horizontal=TRUE, frame=F, xaxt="n", tck=-0.03,
+        col="gray84", xlab="Habitats", cex.axis=0.6, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5)
+axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
+
+dev.copy(png, "figures/FungTax.range.hab.png", units="in", width=6, height=7, res=300)
+dev.off()
+```
+
 
 #### Rangespan of microbiome communities  
 Now create a plot for rangespan--the range in meters for each ASV--and the frequency of phytobiomes for bacteria and fungi.  
@@ -497,19 +555,20 @@ Now create a plot for rangespan--the range in meters for each ASV--and the frequ
 ##FIGURE 2. RANGESPAN OF PHYTOBIOME COMMUNITIES 
 #Set layout to combine boxplot and histogram
 #Next plots will be created next to each other 
-par(mfrow=c(1,2), mar=c(8,1,4,1))
+par(mfrow=c(1,2), mar=c(8,1,3,1))
 
 #First plot: Bacterial rangespan
-#Set margin size for boxplot
-boxplot(rangespan, horizontal=TRUE, vertical=TRUE, col="#481567FF", main="Bacteria", frame=F, cex.main=0.8, xlab="ASV range (m)", cex.axis=0.8) 
+boxplot(rangespan, horizontal=TRUE, vertical=TRUE, col="gray48", main="Bacteria", frame=F, cex=0.5, cex.lab=0.4, xlab="ASV range (m)", cex.main=0.5, xaxt="n", medlwd=1.5)
+axis(side=1, labels=T, seq(0,5000, by=1000), cex.axis=0.4, tck=-0.04)
+
 #Second Plot: Fungal rangespan
-#Set margin size for boxplot
-boxplot(rangespanF, horizontal=TRUE  , col="#95D840FF", main="Fungi", frame=F, cex.main=0.8, xlab="ASV range (m)", cex.axis=0.8)
+boxplot(rangespanF, horizontal=TRUE  , col="gray84", main="Fungi", frame=F, cex.main=0.5, xlab="ASV range (m)", xaxt="n", cex=0.2, cex.lab=0.4, medlwd=1.5, pch=16)
+axis(side=1, labels=T, seq(0,5000, by=1000), cex.axis=0.4, tck=-0.04)
 
 #Add title to figure!
-title(main = "Rangespan of Phytobiome Communities", outer = TRUE, line = -1, cex.main=1)
+title(main = "Rangespan of Phytobiome Communities", outer = TRUE, line = -0.5, cex.main=0.5)
 
-dev.print(png, "figures/community.rangespan.png", units="in", width=6, height=6, res=300)
+dev.copy(png, "figures/community.rangespan.png", units="in", width=4, height=3, res=300)
 dev.off()
 ```
   
@@ -551,11 +610,11 @@ funnested=nestedtemp(funaggtab)
 #make a two row composite figure, reguce spacing between inner and outer margins
 par(mfrow=c(2,1), mai=c(.1,1.,1,1), oma=c(.1,1,.1,1))
 #plot the Bacteria nested figure, suppress taxon names
-plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "purple"), lwd=3, main="Bacteria Nested Plot")
+plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "gray48"), lwd=3, main="Bacteria Nested Plot")
 #add stats are margin text
 mtext("Nested Temp=39.8, P=0.001")
 #plot the fungal nested figure, suppress taxon names
-plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "green"), lwd=3, main="Fungi Nested Plot")
+plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "gray84"), lwd=3, main="Fungi Nested Plot")
 #add stats as margin text
 mtext("Nested Temp=42.5, P=0.001")
 
