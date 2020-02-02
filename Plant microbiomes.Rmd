@@ -84,7 +84,7 @@ Waimea_map_6_sizescaled # Print the plot
   
 <center>  
   
-![**Figure 1. Site map with sampling locations**](figures/bot662_map_final.jpg){ width=60%}
+![**Figure 1. Site map with sampling locations**](figures/Fig1. Waimea map.tif){ width=60%}
 
 </center>  
   
@@ -140,7 +140,7 @@ ggplot(mantel,aes(mantel$V1,mantel$V2))+
   annotate("text", x=.5, y=.3,label="r=0.434, P=0.001")+
   theme(plot.title = element_text(hjust = 1))
 
-dev.print(png, "figures/community.mantel.png", units="in", width=4, height=4, res=300)
+dev.print(png, "figures/FigS3. Community.mantel.png", units="in", width=4, height=4, res=300)
 dev.off()
 
 ```
@@ -488,7 +488,7 @@ cor.test(rangespanF, meanabundF)
 #	p < 0.001"))))
 
 
-dev.print(png, "figures/ASV.range.png", units="in", width=6, height=5, res=300)
+dev.print(png, "figures/Fig4. ASVrangespan.png", units="in", width=6, height=5, res=300)
 dev.off()
 ```
 
@@ -518,7 +518,7 @@ boxplot(bactaxrange$habitats~bacphybymedhab, las=2, horizontal=TRUE, frame=F, xa
         col="gray48", xlab="Habitats", cex.axis=0.6, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5)
 axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
 
-dev.copy(png, "figures/BactTax.range.hab.png", units="in", width=6, height=7, res=300)
+dev.copy(png, "figures/FigS4. BactTax.range.hab.png", units="in", width=6, height=7, res=300)
 dev.off()
 
 
@@ -544,38 +544,14 @@ boxplot(funtaxrange$habitatsF~funphybymedhab, las=2, horizontal=TRUE, frame=F, x
         col="gray84", xlab="Habitats", cex.axis=0.6, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5)
 axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
 
-dev.copy(png, "figures/FungTax.range.hab.png", units="in", width=6, height=7, res=300)
+dev.copy(png, "figures/FigS5.FungTax.range.hab.png", units="in", width=6, height=7, res=300)
 dev.off()
 ```
 
-
-#### Rangespan of microbiome communities  
-Now create a plot for rangespan--the range in meters for each ASV--and the frequency of phytobiomes for bacteria and fungi.  
-```{r, rangespan, results="hide", fig.dim=c(6,4), results='hide'}
-##FIGURE 2. RANGESPAN OF PHYTOBIOME COMMUNITIES 
-#Set layout to combine boxplot and histogram
-#Next plots will be created next to each other 
-par(mfrow=c(1,2), mar=c(8,1,3,1))
-
-#First plot: Bacterial rangespan
-boxplot(rangespan, horizontal=TRUE, vertical=TRUE, col="gray48", main="Bacteria", frame=F, cex=0.5, cex.lab=0.4, xlab="ASV range (m)", cex.main=0.5, xaxt="n", medlwd=1.5)
-axis(side=1, labels=T, seq(0,5000, by=1000), cex.axis=0.4, tck=-0.04)
-
-#Second Plot: Fungal rangespan
-boxplot(rangespanF, horizontal=TRUE  , col="gray84", main="Fungi", frame=F, cex.main=0.5, xlab="ASV range (m)", xaxt="n", cex=0.2, cex.lab=0.4, medlwd=1.5, pch=16)
-axis(side=1, labels=T, seq(0,5000, by=1000), cex.axis=0.4, tck=-0.04)
-
-#Add title to figure!
-title(main = "Rangespan of Phytobiome Communities", outer = TRUE, line = -0.5, cex.main=0.5)
-
-dev.copy(png, "figures/community.rangespan.png", units="in", width=4, height=3, res=300)
-dev.off()
-```
-  
 #### Nestedness plots  
 What is the nestedness for each community within the microhabitats of plant-parts and do they relate to each other among habitats (the sites of collection)?  
 
-```{r, nestedPlots, result="hide", fig.dim=c(5,7)}
+```{r, nestedPlots, results="hide", fig.dim=c(7,7)}
 #Code by Anthony
 #To produce nestedness plots
 
@@ -618,7 +594,7 @@ plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "gray84"), lwd
 #add stats as margin text
 mtext("Nested Temp=42.5, P=0.001")
 
-dev.print(png, "figures/nestedplots.png", units="in", width=6, height=6, res=300)
+dev.print(png, "figures/Fig3. Nestedplots.png", units="in", width=6, height=6, res=300)
 dev.off()
 
 ```
@@ -849,7 +825,8 @@ knitr::kable(results2, digits = c(0, 0, 3, 3, 3, 3))
 ```
 
 ### PERMANOVA
-```{r, PERMANOVA}
+*PERMANOVA for BACTERIA*
+```{r, PERMANOVA bac}
 
 ##PERMANOVA Bacteria
 PS_normal = readRDS("data/PS_normal.gz")
@@ -874,7 +851,10 @@ bact_ps <- phyloseq::distance(PS_normal, method="bray") #Normalized bact data - 
 bact_meta_all = as(sample_data(PS_normal), "data.frame") #Extract sample data and coerce to df
 bact_all = adonis(bact_ps ~ Site + Sample_Type, by = "margin", data = bact_meta_all, permutations = 10000)
 bact_all
+```
 
+*PERMANOVA for Fungi*
+```{r, PERMANOVA fung}
 ##PERMANOVA Fungi
 FPS_normal = readRDS("data/fungal_PS_normal.gz")
 
@@ -942,49 +922,15 @@ phyobj.ord<-ordinate(phyobj.hell, "NMDS", "bray")
 
 #fungus ordination
 funhell.ord<-ordinate(fungal.hell, "NMDS", "bray")
-
-#define colorblind friendly color palette 
-cbPalette1<- c("#F0E442","#D55E00","#E69F00","#009E73","#999999","#CC79A7","#000000","#56B4E9","#0072B2")
-
-#bacteria NMDS by sample type
-bac.NMDS<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", color="SampleType", title="Bacteria") +
-  theme(legend.position="none") +
-  scale_fill_manual(values=cbPalette1) +  
-  scale_colour_manual(values=cbPalette1)+
-  stat_ellipse(geom="polygon",type="t", alpha=0.2, aes(fill=SampleType)) +
-  theme(legend.position="none") + coord_equal(ratio=2.15) +
-  theme_bw()
-
-
-#fungal NMDS by sample type
-fung.NMDS<-plot_ordination(fungal.hell, funhell.ord,type="samples", color="SampleType", title="Fungi") +
-  scale_fill_manual(values=cbPalette1) +  
-  scale_colour_manual(values=cbPalette1)+
-  ylab("")+
-  stat_ellipse(geom="polygon", type="t", alpha=0.2, aes(fill=SampleType)) +
-  theme(legend.position="none") +  coord_equal(ratio=2) +
-  theme_bw()
-
-NMDS.legend <- get_legend(
-    # create some space to the left of the legend
-    fung.NMDS + theme(legend.box.margin = margin(0, 0, 0, 12)))
-
-NMDS.plots<- plot_grid(bac.NMDS + theme(legend.position = "none"), 
-                     fung.NMDS + theme(legend.position = "none"),
-                     ncol=2,nrow=1)
-
-plot_grid(NMDS.plots, NMDS.legend, rel_widths = c(3, 1)) # legend  1/3 size as first obj.
-dev.copy(pdf, "figures/NMDS.fig.pdf", width = 6, height = 4)
-
-
+ 
 ############## Black and White
 
 #bacteria NMDS by sample type
 bac.NMDS<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", shape="SampleType", title="Bacteria") +
   theme(legend.position="none") +
   scale_shape_manual(values=c(0, 21, 2, 3, 4, 17, 15, 8))+
-  stat_ellipse(type="t", linetype=1, col="gray60", lwd=0.4) +
-  theme(legend.position="none") + coord_equal(ratio=2.15) +
+  #stat_ellipse(type="t", linetype=1, col="gray60", lwd=0.4) +
+  theme(legend.position="none") + coord_equal(ratio=2.5) +
   theme_bw()
 
 
@@ -992,7 +938,7 @@ bac.NMDS<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", shape="Sample
 fung.NMDS<-plot_ordination(fungal.hell, funhell.ord, type="samples", shape="SampleType",  title="Fungi") +
   ylab("")+
   scale_shape_manual(values=c(0, 21, 2, 3, 4, 17, 15, 8))+
-  stat_ellipse(type="t", linetype=1, col="gray60", lwd=0.4) +
+  #stat_ellipse(type="t", linetype=1, col="gray60", lwd=0.4) +
   theme(legend.position="none") +  coord_equal(ratio=2) +
   theme_bw()
 
@@ -1005,7 +951,7 @@ NMDS.plots<- plot_grid(bac.NMDS + theme(legend.position = "none"),
                        ncol=2,nrow=1)
 
 plot_grid(NMDS.plots, NMDS.legend, rel_widths = c(3, 1)) # legend  1/3 size as first obj.
-dev.copy(pdf, "figures/NMDS.figBW.pdf", width = 6, height = 4)
+dev.copy(pdf, "figures/Fig2. NMDS.BW.pdf", width = 6, height = 4)
 ```
 
 #### Heatmaps
@@ -1060,7 +1006,7 @@ d2 <- d1 + theme(
 plot(d2)
 
 ##Save Heatmap as tiff file
-tiff("figures/16s_class_heatmap_PSnorm.tiff", units="in", width=12, height=12, res=300) ## Change "ITS_order_heatmap.tiff" to whatever title for the file you choose
+tiff("figures/FigS1. 16S_bact_heatmap.tiff", units="in", width=12, height=12, res=300) ## Change "ITS_order_heatmap.tiff" to whatever title for the file you choose
 plot(d2)
 dev.off()
 
@@ -1078,7 +1024,7 @@ q2 <- q1 + theme(
 plot(q2)
 
 ##Save Heatmap as tiff file
-tiff("figures/ITS_class_heatmap.tiff", units="in", width=12, height=12, res=300) ## Change "ITS_order_heatmap.tiff" to whatever title for the file you choose
+tiff("figures/FigS2. ITS_fungal_heatmap.tiff", units="in", width=12, height=12, res=300)
 plot(q2)
 dev.off()
 ```
