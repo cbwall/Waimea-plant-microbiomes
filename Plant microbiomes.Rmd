@@ -134,13 +134,12 @@ ggplot(mantel,aes(mantel$V1,mantel$V2))+
   geom_point()+
   geom_smooth()+
   theme_bw()+
-  ggtitle("Fungi and Bacteria Community Similarity")+
   xlab("Fungal Dissimilarity")+
   ylab("Bacteria Dissimilarity")+
-  annotate("text", x=.5, y=.3,label="r=0.434, P=0.001")+
+  annotate("text", x=.4, y=.3, label= "r=0.434"~italic("p")~"=0.001", size=3)+
   theme(plot.title = element_text(hjust = 1))
 
-dev.print(png, "figures/FigS3. Community.mantel.png", units="in", width=4, height=4, res=300)
+dev.print(pdf, "figures/FigS3. Community.mantel.pdf", width=4, height=4)
 dev.off()
 
 ```
@@ -388,6 +387,7 @@ boxplot(combined_rangespan~Genus, horizontal = TRUE, xaxt="n", yaxt="n", medlwd=
 	xlab="", cex.axis = 0.6, data = ranges)
 axis(side=1,labels=F, tck=-0.06)
 axis(side=2,labels=c("ASV", "Genus"), cex.axis = 0.6, at=seq(2), tck=-0.06)
+mtext(expression(bold('a')), side=3, line=-0.75, at=0, cex=0.5)
 
 #####################
 #Second Plot: Fungal rangespan (PLOT 2, row 1)
@@ -401,6 +401,7 @@ boxplot(combined_rangespanF~Genus, horizontal = TRUE,  xaxt="n", yaxt="n", cex=0
 	col = "gray84", frame = F, cex.axis=0.8, ylab="", xlab="", lwd=0.8, data = rangesF)
 axis(side=1,labels=F, tck=-0.06)
 axis(side=2,labels=F, at=seq(2), tck=-0.06)
+mtext(expression(bold('b')), side=3, line=-0.75, at=0, cex=0.5)
 
 #compare ranges between bacteria and fungi genera
 t.test(genus_rangespan,genus_rangespanF)
@@ -439,6 +440,7 @@ plot(jitter(rangespan,20),jitter(habitats,3), xaxt="n", yaxt="n", ylim=c(0,10), 
 	abline(lsfit(rangespan,habitats), col="black", lwd=1)
 axis(side=1,labels=F, tck=-0.06)
 axis(side=2, labels=T, tck=-0.06, cex.axis=0.6, at=seq(2,10, by=3))
+mtext(expression(bold('c')), side=3, line=-0.75, at=0, cex=0.5)
 
 #Calculate correlation
 cor.test(rangespan, habitats)
@@ -453,6 +455,7 @@ plot(jitter(rangespanF,20),jitter(habitatsF,3), yaxt="n", xaxt="n", ylim=c(0,10)
 	abline(lsfit(rangespanF,habitatsF), col="black", lwd=1))
 	axis(side=1,labels=F, tck=-0.06)
 	axis(side=2,labels=F, tck=-0.06, at=seq(2,10, by=3))
+mtext(expression(bold('d')), side=3, line=-0.75, at=0, cex=0.5)
 	
 
 #Calculate correlation
@@ -467,6 +470,7 @@ plot(jitter(rangespan,20),jitter(log(meanabund),3),col="gray48", cex=0.2, pch=16
      cex.lab=0.6, xlab="ASV range (m)", ylab="Mean Abundance/Sample \n(Where Present)") +
 axis(side=1,labels=T, tck=-0.06, cex.axis=0.6)
 axis(side=2,labels=T, tck=-0.06, cex.axis=0.6, at=seq(2,10, by=3))
+mtext(expression(bold('e')), side=3, line=-0.75, at=0, cex=0.5)
 
 #Calculate correlation
 cor.test(rangespan, meanabund)
@@ -480,7 +484,7 @@ plot(jitter(rangespanF,20),jitter(log(meanabundF),3),col="gray74", cex=0.2, xaxt
   abline(lsfit(rangespanF,log(meanabundF)), col="black", lwd=1)
 axis(side=1,labels=T, tck=-0.06, cex.axis=0.6)
 axis(side=2,labels=F, tck=-0.06, at=seq(2,10, by=3))
-
+mtext(expression(bold('f')), side=3, line=-0.75, at=0, cex=0.5)
 
 #Calculate correlation
 cor.test(rangespanF, meanabundF)
@@ -488,12 +492,12 @@ cor.test(rangespanF, meanabundF)
 #	p < 0.001"))))
 
 
-dev.print(png, "figures/Fig4. ASVrangespan.png", units="in", width=6, height=5, res=300)
+dev.print(pdf, "figures/Fig4. ASVrangespan.pdf", width=6, height=5)
 dev.off()
 ```
 
 Additional taxonomy summary for abundance-occupancy data, used in Supplementary Figures 4 and 5
-```{r, taxonomy, results="hide", message=FALSE, fig.dim=c(6,5)}
+```{r, taxonomy, results="hide", message=FALSE, fig.dim=c(6,8)}
 
 ### TaxonomySummary ####
 bacttax=tax_table(binarysite)
@@ -504,21 +508,23 @@ bacphybymedrange <- with(bactaxrange, reorder(Phylum, rangespan, median))
 bacphybymedhab <- with(bactaxrange, reorder(Phylum, habitats, median))
 
 ### Bacteria phyla plot
-par(mfrow=c(2,1), mar=c(4,10,1,1)+0.1)
+par(mfrow=c(2,1), mar=c(4,5,1,1)+0.1)
 
 # Bacteria rangespan
 boxplot(bactaxrange$rangespan~bacphybymedrange, las=2, horizontal=TRUE, frame=F, cex.main=1,
-        main="Distribution of Bacteria Phyla", col="gray48", cex=0.4, medlwd=1.5,
-        xaxt="n", tck=-0.03, xlab="Range (m)", ylab="", cex.axis=0.6, cex.lab=0.8)
-axis(side=1, labels=T, seq(0,5500, by=1000), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
-
+        #main="Distribution of Bacteria Phyla", 
+        col="gray48", cex=0.4, medlwd=1.5, lwd=1,
+        xaxt="n", tck=-0.03, xlab="Range (m)", ylab="", cex.axis=0.3, cex.lab=0.8)
+axis(side=1, labels=T, seq(0,5500, by=1000), cex.axis=0.6, cex.lab=0.6, tck=-0.02)
+mtext(expression(bold('a')), side=3, line=-0.75, at=0, cex=0.8)
 
 # Bacteria habitats
 boxplot(bactaxrange$habitats~bacphybymedhab, las=2, horizontal=TRUE, frame=F, xaxt="n", tck=-0.03,
-        col="gray48", xlab="Habitats", cex.axis=0.6, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5)
-axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
+        col="gray48", xlab="Habitats", cex.axis=0.4, cex.lab=0.8, ylab="", cex=0.3, medlwd=1.5, lwd=1)
+axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.02)
+mtext(expression(bold('b')), side=3, line=-0.75, at=1, cex=0.8)
 
-dev.copy(png, "figures/FigS4. BactTax.range.hab.png", units="in", width=6, height=7, res=300)
+dev.copy(pdf, "figures/FigS4. BactTax.range.hab.pdf", width=6, height=8.5)
 dev.off()
 
 
@@ -531,20 +537,23 @@ funphybymedrange <- with(funtaxrange, reorder(Class, rangespanF, median))
 funphybymedhab <- with(funtaxrange, reorder(Class, habitatsF, median))
 
 ### Fungi class plot
-par(mfrow=c(2,1), mar=c(4,10,1,1)+0.1)
+par(mfrow=c(2,1), mar=c(4,5,1,1)+0.1)
 
 # Fungi rangespan
 boxplot(funtaxrange$rangespanF~funphybymedrange,las=2, horizontal=TRUE, frame=F, cex.main=1,
-        main="Distribution of Fungal Classes", col="gray84", cex=0.4, medlwd=1.5,
-        xaxt="n", tck=-0.03, xlab="Range (m)", ylab="", cex.axis=0.6, cex.lab=0.8)
-axis(side=1, labels=T, seq(0,5500, by=1000), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
+        #main="Distribution of Fungal Classes", 
+        col="gray84", cex=0.4, medlwd=1.5, lwd=1,
+        xaxt="n", tck=-0.03, xlab="Range (m)", ylab="", cex.axis=0.4, cex.lab=0.8)
+axis(side=1, labels=T, seq(0,5500, by=1000), cex.axis=0.6, cex.lab=0.6, tck=-0.02)
+mtext(expression(bold('a')), side=3, line=-0.75, at=0, cex=0.8)
 
 # Fungi habitats
 boxplot(funtaxrange$habitatsF~funphybymedhab, las=2, horizontal=TRUE, frame=F, xaxt="n", tck=-0.03,
-        col="gray84", xlab="Habitats", cex.axis=0.6, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5)
-axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.03)
+        col="gray84", xlab="Habitats", cex.axis=0.4, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5, lwd=1)
+axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.02)
+mtext(expression(bold('b')), side=3, line=-0.75, at=1, cex=0.8)
 
-dev.copy(png, "figures/FigS5.FungTax.range.hab.png", units="in", width=6, height=7, res=300)
+dev.copy(pdf, "figures/FigS5. FungTax.range.hab.pdf", width=6, height=8.5)
 dev.off()
 ```
 
@@ -586,15 +595,18 @@ funnested=nestedtemp(funaggtab)
 #make a two row composite figure, reguce spacing between inner and outer margins
 par(mfrow=c(2,1), mai=c(.1,1.,1,1), oma=c(.1,1,.1,1))
 #plot the Bacteria nested figure, suppress taxon names
-plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "gray48"), lwd=3, main="Bacteria Nested Plot")
+plot(nested, kind="incid", names=c(TRUE,FALSE), col=c("white", "gray48"), lwd=2, main="Bacteria", cex.main=0.8, cex.axis=0.8)
 #add stats are margin text
-mtext("Nested Temp=39.8, P=0.001")
-#plot the fungal nested figure, suppress taxon names
-plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "gray84"), lwd=3, main="Fungi Nested Plot")
-#add stats as margin text
-mtext("Nested Temp=42.5, P=0.001")
+mtext(expression(paste("Nested Temp=39.8, ", italic("p") ,"=0.001")), cex=0.7,)
+mtext(expression(bold('a')), side=3, line=0, at=0, cex=0.8,)
 
-dev.print(png, "figures/Fig3. Nestedplots.png", units="in", width=6, height=6, res=300)
+#plot the fungal nested figure, suppress taxon names
+plot(funnested, kind="incid", names=c(TRUE,FALSE), col=c("white", "gray84"), lwd=2, main="Fungi", cex.main=0.8, cex.axis=0.8)
+#add stats as margin text
+mtext(expression(paste("Nested Temp=42.5, ", italic("p") ,"=0.001")), cex=0.7)
+mtext(expression(bold('b')), side=3, line=0, at=0, cex=0.8)
+
+dev.print(pdf, "figures/Fig3. Nestedplots.pdf", width=6, height=6)
 dev.off()
 
 ```
@@ -927,19 +939,22 @@ funhell.ord<-ordinate(fungal.hell, "NMDS", "bray")
 
 #bacteria NMDS by sample type
 bac.NMDS<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", shape="SampleType", title="Bacteria") +
-  theme(legend.position="none") +
+  theme(legend.position="none")+
   scale_shape_manual(values=c(0, 21, 2, 3, 4, 17, 15, 8))+
   #stat_ellipse(type="t", linetype=1, col="gray60", lwd=0.4) +
-  theme(legend.position="none") + coord_equal(ratio=2.5) +
+  coord_equal(ratio=2.68) +
+  annotate(geom="text", x=-1.8, y=1.1, label=expression(bold("a")), size=3)+
   theme_bw()
 
 
 #fungal NMDS by sample type
 fung.NMDS<-plot_ordination(fungal.hell, funhell.ord, type="samples", shape="SampleType",  title="Fungi") +
   ylab("")+
+  theme(legend.position="none")+
   scale_shape_manual(values=c(0, 21, 2, 3, 4, 17, 15, 8))+
   #stat_ellipse(type="t", linetype=1, col="gray60", lwd=0.4) +
-  theme(legend.position="none") +  coord_equal(ratio=2) +
+  coord_equal(ratio=2) +
+  annotate(geom="text", x=-1.2, y=1.1, label=expression(bold("b")), size=3)+
   theme_bw()
 
 NMDS.legend <- get_legend(
