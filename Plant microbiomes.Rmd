@@ -1,7 +1,7 @@
 ---
 title: "Plant-part and environmental gradients shape plant microbiomes"
-author: "C Wall, J Bernard, and UH Mānoa BOT662"
-date: "12/3/2019"
+author: "C Wall, J Bernard, and UH Mānoa BOT662, submitted ISME J"
+date: "2/10/2020"
 output:
   html_document:
     code_folding: hide
@@ -12,9 +12,9 @@ editor_options:
   chunk_output_type: inline
 ---
 ## Overview  
-Plant part and environmental context shape symbiotic microbial compositions, yet the interaction of these two variables are seldom considered. We analyzed epiphytic microbes from nine *Hibiscus tiliaceus* (Hawaiian: *hau*) trees across a steep environmental gradient within a single Hawaiian watershed in Waimea Valley on the north shore of O‘ahu, Hawai‘i. At each location we sampled *nine microhabitats*: leaves, petioles, axils, stems, roots, and litter from the plant, as well as surrounding air and soil.   
+Plant part and environmental context shape symbiotic microbial compositions, yet the interaction of these two variables are seldom considered. We analyzed epiphytic microbes from nine *Hibiscus tiliaceus* (Hawaiian: *hau*) trees across a steep environmental gradient within a single Hawaiian watershed in Waimea Valley on the north shore of O‘ahu, Hawai‘i. At each location we sampled *8 microhabitats*: leaves, petioles, axils, stems, roots, and litter from the plant, as well as surrounding air and soil.   
 
-The composition of microbial communities is driven primarily by microhabitat (i.e., above vs. below ground communities), this variable predicted more than twice the compositional variance in bacteria compared to fungi. Fungal community compositions, in contrast, were more responsive to gradient dynamics than bacteria, and there were differences between spatial dynamics of fungal communities associated with different microhabitats that correlate with distribution patterns and range size. Within plants, microbes were compositionally nested with aboveground communities containing a subset of diversity found belowground. Our findings suggest potential differences in the underlying mechanisms shaping communities of fungi and bacteria associated with plants, and indicate an interaction between assembly mechanisms working simultaneously on different spatial scales.  
+The composition of microbial communities is driven primarily by *microhabitat* (i.e., above vs. below ground communities), this variable predicted more than twice the compositional variance in bacteria compared to fungi. Fungal community compositions, in contrast, were more responsive to gradient dynamics than bacteria, and there were differences between spatial dynamics of fungal communities associated with different microhabitats that correlate with distribution patterns and range size. Within plants, microbes were compositionally nested with aboveground communities containing a subset of diversity found belowground. Our findings suggest potential differences in the underlying mechanisms shaping communities of fungi and bacteria associated with plants, and indicate an interaction between assembly mechanisms working simultaneously on different spatial scales.  
 
 ```{r global options, results="hide", warning=FALSE, message=FALSE}
 if (!require('knitr')) install.packages('knitr'); library('knitr')
@@ -520,7 +520,7 @@ mtext(expression(bold('a')), side=3, line=-0.75, at=0, cex=0.8)
 
 # Bacteria habitats
 boxplot(bactaxrange$habitats~bacphybymedhab, las=2, horizontal=TRUE, frame=F, xaxt="n", tck=-0.03,
-        col="gray48", xlab="Habitats", cex.axis=0.4, cex.lab=0.8, ylab="", cex=0.3, medlwd=1.5, lwd=1)
+        col="gray48", xlab="Microhabitats", cex.axis=0.4, cex.lab=0.8, ylab="", cex=0.3, medlwd=1.5, lwd=1)
 axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.02)
 mtext(expression(bold('b')), side=3, line=-0.75, at=1, cex=0.8)
 
@@ -549,7 +549,7 @@ mtext(expression(bold('a')), side=3, line=-0.75, at=0, cex=0.8)
 
 # Fungi habitats
 boxplot(funtaxrange$habitatsF~funphybymedhab, las=2, horizontal=TRUE, frame=F, xaxt="n", tck=-0.03,
-        col="gray84", xlab="Habitats", cex.axis=0.4, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5, lwd=1)
+        col="gray84", xlab="Microhabitats", cex.axis=0.4, cex.lab=0.8, ylab="", cex=0.4, medlwd=1.5, lwd=1)
 axis(side=1, labels=T, seq(0,8, by=1), cex.axis=0.6, cex.lab=0.6, tck=-0.02)
 mtext(expression(bold('b')), side=3, line=-0.75, at=1, cex=0.8)
 
@@ -940,7 +940,8 @@ funhell.ord<-ordinate(fungal.hell, "NMDS", "bray")
 #bacteria NMDS by sample type
 bac.NMDS<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", shape="SampleType", title="Bacteria") +
   theme(legend.position="none")+
-  scale_shape_manual(values=c(0, 21, 2, 3, 4, 17, 15, 8))+
+  scale_shape_manual(values=c(0, 21, 2, 3, 4, 17, 15, 8),
+                     name="Microhabitats")+
   #stat_ellipse(type="t", linetype=1, col="gray60", lwd=0.4) +
   coord_equal(ratio=2.68) +
   annotate(geom="text", x=-1.8, y=1.1, label=expression(bold("a")), size=3)+
@@ -951,7 +952,8 @@ bac.NMDS<-plot_ordination(phyobj.hell, phyobj.ord, type="samples", shape="Sample
 fung.NMDS<-plot_ordination(fungal.hell, funhell.ord, type="samples", shape="SampleType",  title="Fungi") +
   ylab("")+
   theme(legend.position="none")+
-  scale_shape_manual(values=c(0, 21, 2, 3, 4, 17, 15, 8))+
+  scale_shape_manual(values=c(0, 21, 2, 3, 4, 17, 15, 8),
+                     name="Microhabitats")+
   #stat_ellipse(type="t", linetype=1, col="gray60", lwd=0.4) +
   coord_equal(ratio=2) +
   annotate(geom="text", x=-1.2, y=1.1, label=expression(bold("b")), size=3)+
