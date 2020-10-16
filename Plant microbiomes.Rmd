@@ -1,7 +1,7 @@
 ---
 title: "Plant-part and environmental gradients shape plant microbiomes"
 author: "C Wall, J Bernard, and UH Mānoa BOT662, submitted ISME J"
-date: "2/10/2020"
+date: "10/15/2020"
 output:
   html_document:
     code_folding: hide
@@ -627,6 +627,7 @@ funaggtab=as.data.frame(otu_table(funagg))
 funnested=nestedtemp(funaggtab)
 
 #compare nestedtemp to randomized null distribution
+# note memory intensive
 oecosimu(round(funaggtab), nsimul=1000, nestedtemp, "r2dtable", parallel=4)
 
 #make a two row composite figure, reguce spacing between inner and outer margins

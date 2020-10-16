@@ -1,0 +1,16 @@
+
+Call:
+adonis(formula = bact.gen_ps ~ Site + Sample_Type, data = bact_meta.gen_all,      permutations = 10000, by = "margin") 
+
+Permutation: free
+Number of permutations: 10000
+
+Terms added sequentially (first to last)
+
+            Df SumsOfSqs MeanSqs F.Model      R2    Pr(>F)    
+Site         8    1.3762 0.17202  2.1457 0.10769     3e-04 ***
+Sample_Type  7    6.9136 0.98766 12.3194 0.54100 9.999e-05 ***
+Residuals   56    4.4896 0.08017         0.35132              
+Total       71   12.7794                 1.00000              
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

@@ -1,0 +1,16 @@
+
+Call:
+adonis(formula = fun.gen_ps ~ Site + Sample_Type, data = fun.gen_meta_all,      permutations = 10000, by = "margin") 
+
+Permutation: free
+Number of permutations: 10000
+
+Terms added sequentially (first to last)
+
+            Df SumsOfSqs MeanSqs F.Model      R2    Pr(>F)    
+Site         8    3.7808 0.47260  3.0147 0.24778 9.999e-05 ***
+Sample_Type  7    2.6994 0.38562  2.4599 0.17690 9.999e-05 ***
+Residuals   56    8.7788 0.15676         0.57532              
+Total       71   15.2590                 1.00000              
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

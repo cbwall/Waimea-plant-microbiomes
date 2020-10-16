@@ -1,0 +1,15 @@
+
+Call:
+adonis(formula = fun_ps ~ Ground_Type, data = fun_meta_all, permutations = 10000,      by = "margin") 
+
+Permutation: free
+Number of permutations: 10000
+
+Terms added sequentially (first to last)
+
+            Df SumsOfSqs MeanSqs F.Model      R2    Pr(>F)    
+Ground_Type  1    1.7713 1.77125  5.1946 0.06908 9.999e-05 ***
+Residuals   70   23.8687 0.34098         0.93092              
+Total       71   25.6399                 1.00000              
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
